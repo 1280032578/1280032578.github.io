@@ -1,0 +1,860 @@
+<!DOCTYPE html>
+
+
+
+  
+
+
+<html class="theme-next gemini use-motion" lang="en">
+<head>
+  <meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+<meta name="theme-color" content="#222">
+
+
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="/lib/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css" />
+
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css" />
+
+<link href="/css/main.css?v=5.1.4" rel="stylesheet" type="text/css" />
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png?v=5.1.4">
+
+
+  <link rel="mask-icon" href="/images/logo.svg?v=5.1.4" color="#222">
+
+
+
+
+
+  <meta name="keywords" content="《用Go语言自制解释器》," />
+
+
+
+
+
+
+
+
+
+
+<meta name="description" content="《用Go语言自制解释器》-扩展解释器">
+<meta property="og:type" content="article">
+<meta property="og:title" content="四.扩展解释器">
+<meta property="og:url" content="http://example.com/2022/12/30/%E5%9B%9B-%E6%89%A9%E5%B1%95%E8%A7%A3%E9%87%8A%E5%99%A8/index.html">
+<meta property="og:site_name" content="Penge">
+<meta property="og:description" content="《用Go语言自制解释器》-扩展解释器">
+<meta property="og:locale" content="en_US">
+<meta property="article:published_time" content="2022-12-30T13:28:06.000Z">
+<meta property="article:modified_time" content="2022-12-30T13:45:05.861Z">
+<meta property="article:author" content="John Doe">
+<meta property="article:tag" content="《用Go语言自制解释器》">
+<meta name="twitter:card" content="summary">
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '',
+    scheme: 'Gemini',
+    version: '5.1.4',
+    sidebar: {"position":"left","display":"post","offset":12,"b2t":false,"scrollpercent":false,"onmobile":false},
+    fancybox: true,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    duoshuo: {
+      userId: '0',
+      author: 'Author'
+    },
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+
+  <link rel="canonical" href="http://example.com/2022/12/30/四-扩展解释器/"/>
+
+
+
+
+
+  <title>四.扩展解释器 | Penge</title>
+  
+
+
+
+
+
+
+
+
+<meta name="generator" content="Hexo 6.3.0"></head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="en">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/"  class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">Penge</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <p class="site-subtitle"></p>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/%20" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-home"></i> <br />
+            
+            Home
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-tags">
+          <a href="/tags/%20" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-tags"></i> <br />
+            
+            Tags
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-categories">
+          <a href="/categories/%20" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-th"></i> <br />
+            
+            Categories
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives/%20" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-archive"></i> <br />
+            
+            Archives
+          </a>
+        </li>
+      
+
+      
+    </ul>
+  
+
+  
+</nav>
+
+
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://example.com/2022/12/30/%E5%9B%9B-%E6%89%A9%E5%B1%95%E8%A7%A3%E9%87%8A%E5%99%A8/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/user.jpg">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Penge">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">四.扩展解释器</h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">Posted on</span>
+              
+              <time title="Post created" itemprop="dateCreated datePublished" datetime="2022-12-30T21:28:06+08:00">
+                2022-12-30
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">In</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/Monkey%E8%A7%A3%E9%87%8A%E5%99%A8/" itemprop="url" rel="index">
+                    <span itemprop="name">Monkey解释器</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+              <div class="post-description">
+                  《用Go语言自制解释器》-扩展解释器
+              </div>
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <h1 id="扩展解释器"><a href="#扩展解释器" class="headerlink" title="扩展解释器"></a>扩展解释器</h1><h2 id="字符串"><a href="#字符串" class="headerlink" title="字符串"></a>字符串</h2><p>在Monkey中，字符串是一个字符序列。用双引号围起来的。</p>
+<h3 id="在词法分析器中支持字符串"><a href="#在词法分析器中支持字符串" class="headerlink" title="在词法分析器中支持字符串"></a>在词法分析器中支持字符串</h3><p>首先向token包添加新的STRING词法单元类型：</p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// token/token.go</span></span><br><span class="line"></span><br><span class="line"><span class="keyword">const</span> (</span><br><span class="line"><span class="comment">// [...]</span></span><br><span class="line">    STRING = <span class="string">&quot;STRING&quot;</span></span><br><span class="line"><span class="comment">// [...]</span></span><br><span class="line">)</span><br></pre></td></tr></table></figure>
+
+<p>之后，需要在Lexer的switch语句中为”添加一个case分支，再添加一个小型辅助方法</p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// lexer/lexer.go</span></span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="params">(l *Lexer)</span></span> NextToken() token.Token &#123;</span><br><span class="line"><span class="comment">// [...]</span></span><br><span class="line"></span><br><span class="line">    <span class="keyword">switch</span> l.ch &#123;</span><br><span class="line"><span class="comment">// [...]</span></span><br><span class="line">    <span class="keyword">case</span> <span class="string">&#x27;&quot;&#x27;</span>:</span><br><span class="line">        tok.Type = token.STRING</span><br><span class="line">        tok.Literal = l.readString()</span><br><span class="line"><span class="comment">// [...]</span></span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">// [...]</span></span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="params">(l *Lexer)</span></span> readString() <span class="type">string</span> &#123;</span><br><span class="line">    position := l.position + <span class="number">1</span></span><br><span class="line">    <span class="keyword">for</span> &#123;</span><br><span class="line">        l.readChar()</span><br><span class="line">        <span class="keyword">if</span> l.ch == <span class="string">&#x27;&quot;&#x27;</span> || l.ch == <span class="number">0</span> &#123;</span><br><span class="line">            <span class="keyword">break</span></span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">return</span> l.input[position:l.position]</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h3 id="字符串语法分析"><a href="#字符串语法分析" class="headerlink" title="字符串语法分析"></a>字符串语法分析</h3><p>为了让语法分析器将token.STRING转换为字符串字面量的AST节点，首先需要定义这个节点。</p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// ast/ast.go</span></span><br><span class="line"></span><br><span class="line"><span class="keyword">type</span> StringLiteral <span class="keyword">struct</span> &#123;</span><br><span class="line">    Token token.Token</span><br><span class="line">    Value <span class="type">string</span></span><br><span class="line">&#125;</span><br><span class="line"><span class="comment">// 字符串字面量是表达式，而不是语句</span></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="params">(sl *StringLiteral)</span></span> expressionNode()      &#123;&#125;</span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="params">(sl *StringLiteral)</span></span> TokenLiteral() <span class="type">string</span> &#123; <span class="keyword">return</span> sl.Token.Literal &#125;</span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="params">(sl *StringLiteral)</span></span> String() <span class="type">string</span>       &#123; <span class="keyword">return</span> sl.Token.Literal &#125;</span><br></pre></td></tr></table></figure>
+
+<p>紧接着，我们要做的就是为token.STRING词法单元注册一个新的prefixParseFn。之后这个解析函数就能返回*ast.StringLiteral了。</p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// parser/parser.go</span></span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">New</span><span class="params">(l *lexer.Lexer)</span></span> *Parser &#123;</span><br><span class="line"><span class="comment">// [...]</span></span><br><span class="line">    p.registerPrefix(token.STRING, p.parseStringLiteral)</span><br><span class="line"><span class="comment">// [...]</span></span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="params">(p *Parser)</span></span> parseStringLiteral() ast.Expression &#123;</span><br><span class="line">    <span class="keyword">return</span> &amp;ast.StringLiteral&#123;Token: p.curToken, Value: p.curToken.Literal&#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h3 id="字符串求值"><a href="#字符串求值" class="headerlink" title="字符串求值"></a>字符串求值</h3><p>在对象系统中表示字符串。</p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// object/object.go</span></span><br><span class="line"></span><br><span class="line"><span class="keyword">const</span> (</span><br><span class="line"><span class="comment">// [...]</span></span><br><span class="line">    STRING_OBJ = <span class="string">&quot;STRING&quot;</span></span><br><span class="line">)</span><br><span class="line"></span><br><span class="line"><span class="keyword">type</span> String <span class="keyword">struct</span> &#123;</span><br><span class="line">    Value <span class="type">string</span></span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="params">(s *String)</span></span> Type() ObjectType &#123; <span class="keyword">return</span> STRING_OBJ &#125;</span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="params">(s *String)</span></span> Inspect() <span class="type">string</span>  &#123; <span class="keyword">return</span> s.Value &#125;</span><br></pre></td></tr></table></figure>
+
+<p>添加Eval函数</p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// evaluator/evaluator.go</span></span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">Eval</span><span class="params">(node ast.Node, env *object.Environment)</span></span> object.Object &#123;</span><br><span class="line"><span class="comment">// [...]</span></span><br><span class="line"></span><br><span class="line">    <span class="keyword">case</span> *ast.StringLiteral:</span><br><span class="line">        <span class="keyword">return</span> &amp;object.String&#123;Value: node.Value&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">// [...]</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h3 id="字符串连接"><a href="#字符串连接" class="headerlink" title="字符串连接"></a>字符串连接</h3><p>现在有了字符串数据类型,接下来完善字符串。让其具有连接的功能。</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="string">&quot;Hello&quot;</span> + <span class="string">&quot; &quot;</span> + <span class="string">&quot;World!&quot;</span></span><br><span class="line"><span class="string">&quot;Hello World!&quot;</span></span><br></pre></td></tr></table></figure>
+
+<p>这里需要修改的地方是evalInfixExpression方法，为其添加新分支。</p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// evaluator/evaluator.go</span></span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">evalInfixExpression</span><span class="params">(</span></span></span><br><span class="line"><span class="params"><span class="function">    operator <span class="type">string</span>,</span></span></span><br><span class="line"><span class="params"><span class="function">    left, right object.Object,</span></span></span><br><span class="line"><span class="params"><span class="function">)</span></span> object.Object &#123;</span><br><span class="line">    <span class="keyword">switch</span> &#123;</span><br><span class="line"><span class="comment">// [...]</span></span><br><span class="line">    <span class="keyword">case</span> left.Type() == object.STRING_OBJ &amp;&amp; right.Type() == object.STRING_OBJ:</span><br><span class="line">        <span class="keyword">return</span> evalStringInfixExpression(operator, left, right)</span><br><span class="line"><span class="comment">// [...]</span></span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"><span class="comment">// evaluator/evaluator.go</span></span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">evalStringInfixExpression</span><span class="params">(</span></span></span><br><span class="line"><span class="params"><span class="function">    operator <span class="type">string</span>,</span></span></span><br><span class="line"><span class="params"><span class="function">    left, right object.Object,</span></span></span><br><span class="line"><span class="params"><span class="function">)</span></span> object.Object &#123;</span><br><span class="line">    <span class="keyword">if</span> operator != <span class="string">&quot;+&quot;</span> &#123;</span><br><span class="line">        <span class="keyword">return</span> newError(<span class="string">&quot;unknown operator: %s %s %s&quot;</span>,</span><br><span class="line">            left.Type(), operator, right.Type())</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    leftVal := left.(*object.String).Value</span><br><span class="line">    rightVal := right.(*object.String).Value</span><br><span class="line">    <span class="keyword">return</span> &amp;object.String&#123;Value: leftVal + rightVal&#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h2 id="内置函数"><a href="#内置函数" class="headerlink" title="内置函数"></a>内置函数</h2><p>这节将给解释器添加内置函数。</p>
+<p>要添加的内置函数由我们（解释器的实现者）定义。解释器的用户可以调用这些由我们定义的函数。</p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// object/object.go</span></span><br><span class="line"><span class="comment">// 函数需要接受零个或多个object.Object作为参数并能返回一个object.Object</span></span><br><span class="line"><span class="keyword">type</span> BuiltinFunction <span class="function"><span class="keyword">func</span><span class="params">(args ...Object)</span></span> Object</span><br></pre></td></tr></table></figure>
+
+<p>为了让这些BuiltinFunction对用户可用，需要将其配置到对象系统中</p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// object/object.go</span></span><br><span class="line"></span><br><span class="line"><span class="keyword">const</span> (</span><br><span class="line"><span class="comment">// [...]</span></span><br><span class="line">    BUILTIN_OBJ = <span class="string">&quot;BUILTIN&quot;</span></span><br><span class="line">)</span><br><span class="line"></span><br><span class="line"><span class="keyword">type</span> Builtin <span class="keyword">struct</span> &#123;</span><br><span class="line">    Fn BuiltinFunction</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="params">(b *Builtin)</span></span> Type() ObjectType &#123; <span class="keyword">return</span> BUILTIN_OBJ &#125;</span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="params">(b *Builtin)</span></span> Inspect() <span class="type">string</span>  &#123; <span class="keyword">return</span> <span class="string">&quot;builtin function&quot;</span> &#125;</span><br></pre></td></tr></table></figure>
+
+<p>具体操作方式是进行一层封装。</p>
+<p>为了使用这个环境，需要修改evalIdentifier函数。如果在当前环境中发现某个标识符没有绑定的值，那么就在内置函数的环境中查找这个标识符：</p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// evaluator/evaluator.go</span></span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">evalIdentifier</span><span class="params">(</span></span></span><br><span class="line"><span class="params"><span class="function">    node *ast.Identifier,</span></span></span><br><span class="line"><span class="params"><span class="function">    env *object.Environment,</span></span></span><br><span class="line"><span class="params"><span class="function">)</span></span> object.Object &#123;</span><br><span class="line">    <span class="keyword">if</span> val, ok := env.Get(node.Value); ok &#123;</span><br><span class="line">        <span class="keyword">return</span> val</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">if</span> builtin, ok := builtins[node.Value]; ok &#123;</span><br><span class="line">        <span class="keyword">return</span> builtin</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">return</span> newError(<span class="string">&quot;identifier not found: &quot;</span> + node.Value)</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>之后，我们需要让一个方法applyFunction能够处理*object.Builtin和object.BuiltinFunction：</p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// evaluator/evaluator.go</span></span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">applyFunction</span><span class="params">(fn object.Object, args []object.Object)</span></span> object.Object &#123;</span><br><span class="line">    <span class="keyword">switch</span> fn := fn.(<span class="keyword">type</span>) &#123;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">case</span> *object.Function:</span><br><span class="line">        extendedEnv := extendFunctionEnv(fn, args)</span><br><span class="line">        evaluated := Eval(fn.Body, extendedEnv)</span><br><span class="line">        <span class="keyword">return</span> unwrapReturnValue(evaluated)</span><br><span class="line"></span><br><span class="line">    <span class="keyword">case</span> *object.Builtin:</span><br><span class="line">        <span class="keyword">return</span> fn.Fn(args...)</span><br><span class="line">    <span class="keyword">default</span>:</span><br><span class="line">        <span class="keyword">return</span> newError(<span class="string">&quot;not a function: %s&quot;</span>, fn.Type())</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>编写builtins内置函数：</p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// evaluator/builtins.go</span></span><br><span class="line"></span><br><span class="line"><span class="keyword">import</span> (</span><br><span class="line">    <span class="string">&quot;monkey/object&quot;</span></span><br><span class="line">)</span><br><span class="line"></span><br><span class="line"><span class="keyword">var</span> builtins = <span class="keyword">map</span>[<span class="type">string</span>]*object.Builtin&#123;</span><br><span class="line">    <span class="string">&quot;len&quot;</span>: &amp;object.Builtin&#123;</span><br><span class="line">        Fn: <span class="function"><span class="keyword">func</span><span class="params">(args ...object.Object)</span></span> object.Object &#123;</span><br><span class="line">            <span class="keyword">if</span> <span class="built_in">len</span>(args) != <span class="number">1</span> &#123;</span><br><span class="line">                <span class="keyword">return</span> newError(<span class="string">&quot;wrong number of arguments. got=%d, want=1&quot;</span>,</span><br><span class="line">                    <span class="built_in">len</span>(args))</span><br><span class="line">            &#125;</span><br><span class="line"></span><br><span class="line">            <span class="keyword">switch</span> arg := args[<span class="number">0</span>].(<span class="keyword">type</span>) &#123;</span><br><span class="line">            <span class="keyword">case</span> *object.String:</span><br><span class="line">                <span class="keyword">return</span> &amp;object.Integer&#123;Value: <span class="type">int64</span>(<span class="built_in">len</span>(arg.Value))&#125;</span><br><span class="line">            <span class="keyword">default</span>:</span><br><span class="line">                <span class="keyword">return</span> newError(<span class="string">&quot;argument to `len` not supported, got %s&quot;</span>,</span><br><span class="line">                    args[<span class="number">0</span>].Type())</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;,</span><br><span class="line">    &#125;,</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h2 id="数组"><a href="#数组" class="headerlink" title="数组"></a>数组</h2><p>在Monkey中，数组是含有多个元素的有序列表，其中的元素类型可以不相同。</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">&gt;&gt; <span class="built_in">let</span> myArray = [<span class="string">&quot;Thorsten&quot;</span>, <span class="string">&quot;Ball&quot;</span>, 28, fn(x) &#123; x * x &#125;];</span><br><span class="line">&gt;&gt; myArray[0]</span><br><span class="line">Thorsten</span><br><span class="line">&gt;&gt; myArray[2]</span><br><span class="line">28</span><br><span class="line">&gt;&gt; myArray[3](2);</span><br><span class="line">4</span><br></pre></td></tr></table></figure>
+
+<h3 id="在词法分析器中支持数组"><a href="#在词法分析器中支持数组" class="headerlink" title="在词法分析器中支持数组"></a>在词法分析器中支持数组</h3><figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// token/token.go</span></span><br><span class="line"></span><br><span class="line"><span class="keyword">const</span> (</span><br><span class="line"><span class="comment">// [...]</span></span><br><span class="line"></span><br><span class="line">    LBRACKET = <span class="string">&quot;[&quot;</span></span><br><span class="line">    RBRACKET = <span class="string">&quot;]&quot;</span></span><br><span class="line"></span><br><span class="line"><span class="comment">// [...]</span></span><br><span class="line">)</span><br></pre></td></tr></table></figure>
+
+<p>第二步是扩展词法分析器的测试套件。</p>
+<p>同样，还要扩展input，让其包括新的词法单元。只需向NextToken()添加4行代码。</p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// lexer/lexer.go</span></span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="params">(l *Lexer)</span></span> NextToken() token.Token &#123;</span><br><span class="line"><span class="comment">// [...]</span></span><br><span class="line"></span><br><span class="line">    <span class="keyword">case</span> <span class="string">&#x27;[&#x27;</span>:</span><br><span class="line">        tok = newToken(token.LBRACKET, l.ch)</span><br><span class="line">    <span class="keyword">case</span> <span class="string">&#x27;]&#x27;</span>:</span><br><span class="line">        tok = newToken(token.RBRACKET, l.ch)</span><br><span class="line"></span><br><span class="line"><span class="comment">// [...]</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h3 id="数组字面量语法分析"><a href="#数组字面量语法分析" class="headerlink" title="数组字面量语法分析"></a>数组字面量语法分析</h3><p>首先要为数组字面量定义AST节点。</p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// ast/ast.go</span></span><br><span class="line"></span><br><span class="line"><span class="keyword">type</span> ArrayLiteral <span class="keyword">struct</span> &#123;</span><br><span class="line">    Token    token.Token <span class="comment">// &#x27;[&#x27;词法单元</span></span><br><span class="line">    Elements []Expression</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="params">(al *ArrayLiteral)</span></span> expressionNode()      &#123;&#125;</span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="params">(al *ArrayLiteral)</span></span> TokenLiteral() <span class="type">string</span> &#123; <span class="keyword">return</span> al.Token.Literal &#125;</span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="params">(al *ArrayLiteral)</span></span> String() <span class="type">string</span> &#123;</span><br><span class="line">    <span class="keyword">var</span> out bytes.Buffer</span><br><span class="line"></span><br><span class="line">    elements := []<span class="type">string</span>&#123;&#125;</span><br><span class="line">    <span class="keyword">for</span> _, el := <span class="keyword">range</span> al.Elements &#123;</span><br><span class="line">        elements = <span class="built_in">append</span>(elements, el.String())</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    out.WriteString(<span class="string">&quot;[&quot;</span>)</span><br><span class="line">    out.WriteString(strings.Join(elements, <span class="string">&quot;, &quot;</span>))</span><br><span class="line">    out.WriteString(<span class="string">&quot;]&quot;</span>)</span><br><span class="line"></span><br><span class="line">    <span class="keyword">return</span> out.String()</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>接着，需要在语法分析器中注册一个新的prefixParseFn，因为数组字面量开头的左方括号token.LBRACKET位于前缀位置。</p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// parser/parser.go</span></span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">New</span><span class="params">(l *lexer.Lexer)</span></span> *Parser &#123;</span><br><span class="line"><span class="comment">// [...]</span></span><br><span class="line"></span><br><span class="line">    p.registerPrefix(token.LBRACKET, p.parseArrayLiteral)</span><br><span class="line"><span class="comment">// [...]</span></span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="params">(p *Parser)</span></span> parseArrayLiteral() ast.Expression &#123;</span><br><span class="line">    array := &amp;ast.ArrayLiteral&#123;Token: p.curToken&#125;</span><br><span class="line"></span><br><span class="line">    array.Elements = p.parseExpressionList(token.RBRACKET)</span><br><span class="line"></span><br><span class="line">    <span class="keyword">return</span> array</span><br><span class="line">&#125;</span><br><span class="line"><span class="comment">// parser/parser.go</span></span><br><span class="line"><span class="comment">// 解析数组中表达式</span></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="params">(p *Parser)</span></span> parseExpressionList(end token.TokenType) []ast.Expression &#123;</span><br><span class="line">    list := []ast.Expression&#123;&#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">if</span> p.peekTokenIs(end) &#123;</span><br><span class="line">        p.nextToken()</span><br><span class="line">        <span class="keyword">return</span> list</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    p.nextToken()</span><br><span class="line">    list = <span class="built_in">append</span>(list, p.parseExpression(LOWEST))</span><br><span class="line"></span><br><span class="line">    <span class="keyword">for</span> p.peekTokenIs(token.COMMA) &#123;</span><br><span class="line">        p.nextToken()</span><br><span class="line">        p.nextToken()</span><br><span class="line">        list = <span class="built_in">append</span>(list, p.parseExpression(LOWEST))</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">if</span> !p.expectPeek(end) &#123;</span><br><span class="line">        <span class="keyword">return</span> <span class="literal">nil</span></span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">return</span> list</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>同样，这些操作之前在parseCallArguments中都见过。唯一的修改是新版本会接受一个end参数，用来告诉方法哪个词法单元表示列表的结尾。parseCallExpression方法之前是parseCallArguments，更新后的版本如下所示：</p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// parser/parser.go</span></span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="params">(p *Parser)</span></span> parseCallExpression(function ast.Expression) ast.Expression &#123;</span><br><span class="line">    exp := &amp;ast.CallExpression&#123;Token: p.curToken, Function: function&#125;</span><br><span class="line">    exp.Arguments = p.parseExpressionList(token.RPAREN)</span><br><span class="line">    <span class="keyword">return</span> exp</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>其中唯一的修改是使用token.RPAREN（表示参数列表的末尾）调用parseExpressionList。</p>
+<h3 id="索引运算符表达式语法分析"><a href="#索引运算符表达式语法分析" class="headerlink" title="索引运算符表达式语法分析"></a>索引运算符表达式语法分析</h3><p>为了完全支持Monkey中的数组，不仅需要解析数组字面量，还需要解析索引运算符表达式。</p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">myArray[<span class="number">0</span>];</span><br><span class="line">myArray[<span class="number">1</span>];</span><br><span class="line">myArray[<span class="number">2</span>];</span><br></pre></td></tr></table></figure>
+
+<p>基本结构是这样的：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">&lt;表达式&gt;[&lt;表达式&gt;]</span><br></pre></td></tr></table></figure>
+
+<p>现在需要定义一个名为ast.IndexExpression的新AST节点，用来表示这种结构：</p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// ast/ast.go</span></span><br><span class="line"></span><br><span class="line"><span class="keyword">type</span> IndexExpression <span class="keyword">struct</span> &#123;</span><br><span class="line">    Token token.Token <span class="comment">// &#x27;[&#x27;词法单元</span></span><br><span class="line">    Left  Expression</span><br><span class="line">    Index Expression<span class="comment">//语法上讲，Index可以是任何类型的表达式，但在语义上，该表达式必须产生一个整数。</span></span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="params">(ie *IndexExpression)</span></span> expressionNode()      &#123;&#125;</span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="params">(ie *IndexExpression)</span></span> TokenLiteral() <span class="type">string</span> &#123; <span class="keyword">return</span> ie.Token.Literal &#125;</span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="params">(ie *IndexExpression)</span></span> String() <span class="type">string</span> &#123;</span><br><span class="line">    <span class="keyword">var</span> out bytes.Buffer</span><br><span class="line"></span><br><span class="line">    out.WriteString(<span class="string">&quot;(&quot;</span>)</span><br><span class="line">    out.WriteString(ie.Left.String())</span><br><span class="line">    out.WriteString(<span class="string">&quot;[&quot;</span>)</span><br><span class="line">    out.WriteString(ie.Index.String())</span><br><span class="line">    out.WriteString(<span class="string">&quot;])&quot;</span>)</span><br><span class="line"></span><br><span class="line">    <span class="keyword">return</span> out.String()</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>分析来说，也就是将myArray[0]中的[视为中缀运算符，将myArray视为左操作数，将0视为右操作数。</p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// parser/parser.go</span></span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">New</span><span class="params">(l *lexer.Lexer)</span></span> *Parser &#123;</span><br><span class="line"><span class="comment">// [...]</span></span><br><span class="line"></span><br><span class="line">    p.registerInfix(token.LBRACKET, p.parseIndexExpression)</span><br><span class="line"></span><br><span class="line"><span class="comment">// [...]</span></span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="params">(p *Parser)</span></span> parseIndexExpression(left ast.Expression) ast.Expression &#123;</span><br><span class="line">    exp := &amp;ast.IndexExpression&#123;Token: p.curToken, Left: left&#125;</span><br><span class="line"></span><br><span class="line">    p.nextToken()</span><br><span class="line">    exp.Index = p.parseExpression(LOWEST)</span><br><span class="line"></span><br><span class="line">    <span class="keyword">if</span> !p.expectPeek(token.RBRACKET) &#123;</span><br><span class="line">        <span class="keyword">return</span> <span class="literal">nil</span></span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">return</span> exp</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>这是因为普拉特语法分析器背后的整个思想都是基于优先级，而刚才还没有定义索引运算符的优先级：</p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// parser/parser.go</span></span><br><span class="line"><span class="keyword">const</span> (</span><br><span class="line">    _ <span class="type">int</span> = <span class="literal">iota</span></span><br><span class="line"><span class="comment">// [...]</span></span><br><span class="line">    INDEX       <span class="comment">// array[index]</span></span><br><span class="line">)</span><br><span class="line"></span><br><span class="line"><span class="keyword">var</span> precedences = <span class="keyword">map</span>[token.TokenType]<span class="type">int</span>&#123;</span><br><span class="line"><span class="comment">// [...]</span></span><br><span class="line">    token.LBRACKET: INDEX,</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>INDEX的定义要放在const块的最后一行，这很重要，因为iota会让INDEX在所有定义的优先级常量中拥有最高的优先级。precedences中添加的INDEX赋予了token.LBRACKET最高的优先级。</p>
+<h3 id="数组字面量求值"><a href="#数组字面量求值" class="headerlink" title="数组字面量求值"></a>数组字面量求值</h3><p>我们只需定义一个新的object.Array类型，作为对数组字面量的求值结果。</p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// object/object.go</span></span><br><span class="line"></span><br><span class="line"><span class="keyword">const</span> (</span><br><span class="line"><span class="comment">// [...]</span></span><br><span class="line">    ARRAY_OBJ = <span class="string">&quot;ARRAY&quot;</span></span><br><span class="line">)</span><br><span class="line"></span><br><span class="line"><span class="keyword">type</span> Array <span class="keyword">struct</span> &#123;</span><br><span class="line">    Elements []Object</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="params">(ao *Array)</span></span> Type() ObjectType &#123; <span class="keyword">return</span> ARRAY_OBJ &#125;</span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="params">(ao *Array)</span></span> Inspect() <span class="type">string</span> &#123;</span><br><span class="line">    <span class="keyword">var</span> out bytes.Buffer</span><br><span class="line"></span><br><span class="line">    elements := []<span class="type">string</span>&#123;&#125;</span><br><span class="line">    <span class="keyword">for</span> _, e := <span class="keyword">range</span> ao.Elements &#123;</span><br><span class="line">        elements = <span class="built_in">append</span>(elements, e.Inspect())</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    out.WriteString(<span class="string">&quot;[&quot;</span>)</span><br><span class="line">    out.WriteString(strings.Join(elements, <span class="string">&quot;, &quot;</span>))</span><br><span class="line">    out.WriteString(<span class="string">&quot;]&quot;</span>)</span><br><span class="line"></span><br><span class="line">    <span class="keyword">return</span> out.String()</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+
+
+<p>下面添加的case分支会对*ast.ArrayLiteral求值并生成数组对象：</p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// evaluator/evaluator.go</span></span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">Eval</span><span class="params">(node ast.Node, env *object.Environment)</span></span> object.Object &#123;</span><br><span class="line"><span class="comment">// [...]</span></span><br><span class="line"></span><br><span class="line">    <span class="keyword">case</span> *ast.ArrayLiteral:</span><br><span class="line">        elements := evalExpressions(node.Elements, env)</span><br><span class="line">        <span class="keyword">if</span> <span class="built_in">len</span>(elements) == <span class="number">1</span> &amp;&amp; isError(elements[<span class="number">0</span>]) &#123;</span><br><span class="line">            <span class="keyword">return</span> elements[<span class="number">0</span>]</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">return</span> &amp;object.Array&#123;Elements: elements&#125;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">// [...]</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h3 id="索引运算符表达式求值"><a href="#索引运算符表达式求值" class="headerlink" title="索引运算符表达式求值"></a>索引运算符表达式求值</h3><figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br></pre></td><td class="code"><pre><span class="line">&#123;</span><br><span class="line">    <span class="string">&quot;[1, 2, 3][0]&quot;</span>,</span><br><span class="line">    <span class="number">1</span>,</span><br><span class="line">&#125;,</span><br><span class="line">&#123;</span><br><span class="line">    <span class="string">&quot;[1, 2, 3][1]&quot;</span>,</span><br><span class="line">    <span class="number">2</span>,</span><br><span class="line">&#125;,</span><br><span class="line">&#123;</span><br><span class="line">    <span class="string">&quot;[1, 2, 3][2]&quot;</span>,</span><br><span class="line">    <span class="number">3</span>,</span><br><span class="line">&#125;,</span><br><span class="line">&#123;</span><br><span class="line">    <span class="string">&quot;let i = 0; [1][i];&quot;</span>,</span><br><span class="line">    <span class="number">1</span>,</span><br><span class="line">&#125;,</span><br><span class="line">&#123;</span><br><span class="line">    <span class="string">&quot;[1, 2, 3][1 + 1];&quot;</span>,</span><br><span class="line">    <span class="number">3</span>,</span><br><span class="line">&#125;,</span><br><span class="line">&#123;</span><br><span class="line">    <span class="string">&quot;let myArray = [1, 2, 3]; myArray[2];&quot;</span>,</span><br><span class="line">    <span class="number">3</span>,</span><br><span class="line">&#125;,</span><br><span class="line">&#123;</span><br><span class="line">    <span class="string">&quot;let myArray = [1, 2, 3]; myArray[0] + myArray[1] + myArray[2];&quot;</span>,</span><br><span class="line">    <span class="number">6</span>,</span><br><span class="line">&#125;,</span><br><span class="line">&#123;</span><br><span class="line">    <span class="string">&quot;let myArray = [1, 2, 3]; let i = myArray[0]; myArray[i]&quot;</span>,</span><br><span class="line">    <span class="number">2</span>,</span><br><span class="line">&#125;,</span><br><span class="line">&#123;</span><br><span class="line">    <span class="string">&quot;[1, 2, 3][3]&quot;</span>,</span><br><span class="line">    <span class="literal">nil</span>,</span><br><span class="line">&#125;,</span><br><span class="line">&#123;</span><br><span class="line">    <span class="string">&quot;[1, 2, 3][-1]&quot;</span>,</span><br><span class="line">    <span class="literal">nil</span>,</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>下面是*ast.IndexExpression的case分支，用来进行所需的Eval调用：</p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// evaluator/evaluator.go</span></span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">Eval</span><span class="params">(node ast.Node, env *object.Environment)</span></span> object.Object &#123;</span><br><span class="line"><span class="comment">// [...]</span></span><br><span class="line"></span><br><span class="line">    <span class="keyword">case</span> *ast.IndexExpression:</span><br><span class="line">        left := Eval(node.Left, env)</span><br><span class="line">        <span class="keyword">if</span> isError(left) &#123;</span><br><span class="line">            <span class="keyword">return</span> left</span><br><span class="line">        &#125;</span><br><span class="line">        index := Eval(node.Index, env)</span><br><span class="line">        <span class="keyword">if</span> isError(index) &#123;</span><br><span class="line">            <span class="keyword">return</span> index</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">return</span> evalIndexExpression(left, index)</span><br><span class="line"></span><br><span class="line"><span class="comment">// [...]</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>下面是其中使用的evalIndexExpression函数：</p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// evaluator/evaluator.go</span></span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">evalIndexExpression</span><span class="params">(left, index object.Object)</span></span> object.Object &#123;</span><br><span class="line">    <span class="keyword">switch</span> &#123;</span><br><span class="line">    <span class="keyword">case</span> left.Type() == object.ARRAY_OBJ &amp;&amp; index.Type() == object.INTEGER_OBJ:</span><br><span class="line">        <span class="keyword">return</span> evalArrayIndexExpression(left, index)</span><br><span class="line">    <span class="keyword">default</span>:</span><br><span class="line">        <span class="keyword">return</span> newError(<span class="string">&quot;index operator not supported: %s&quot;</span>, left.Type())</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>真正的操作是在evalArrayIndexExpression中进行</p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// evaluator/evaluator.go</span></span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">evalArrayIndexExpression</span><span class="params">(array, index object.Object)</span></span> object.Object &#123;</span><br><span class="line">    arrayObject := array.(*object.Array)</span><br><span class="line">    idx := index.(*object.Integer).Value</span><br><span class="line">    max := <span class="type">int64</span>(<span class="built_in">len</span>(arrayObject.Elements) - <span class="number">1</span>)</span><br><span class="line"></span><br><span class="line">    <span class="keyword">if</span> idx &lt; <span class="number">0</span> || idx &gt; max &#123;</span><br><span class="line">        <span class="keyword">return</span> NULL</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">return</span> arrayObject.Elements[idx]</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+
+
+<h3 id="为数组添加内置函数"><a href="#为数组添加内置函数" class="headerlink" title="为数组添加内置函数"></a>为数组添加内置函数</h3><p>与之前的添加内置函数方法类似，可以为其添加len,first,last,push，reset等。</p>
+<h2 id="哈希表"><a href="#哈希表" class="headerlink" title="哈希表"></a>哈希表</h2><p>为了在Monkey中构造哈希表，需要使用哈希字面量：用花括号括起来的键字值对列表，列表中的键值值对用逗号分隔。</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">&gt;&gt; <span class="built_in">let</span> myHash = &#123;<span class="string">&quot;name&quot;</span>: <span class="string">&quot;Jimmy&quot;</span>, <span class="string">&quot;age&quot;</span>: 72, <span class="string">&quot;band&quot;</span>: <span class="string">&quot;Led Zeppelin&quot;</span>&#125;;</span><br><span class="line">&gt;&gt; myHash[<span class="string">&quot;name&quot;</span>]</span><br><span class="line">Jimmy</span><br><span class="line">&gt;&gt; myHash[<span class="string">&quot;age&quot;</span>]</span><br><span class="line">72</span><br><span class="line">&gt;&gt; myHash[<span class="string">&quot;band&quot;</span>]</span><br><span class="line">Led Zeppelin</span><br></pre></td></tr></table></figure>
+
+<h3 id="哈希字面量词法分析"><a href="#哈希字面量词法分析" class="headerlink" title="哈希字面量词法分析"></a>哈希字面量词法分析</h3><p>首先需要在token包中定义:的词法单元类型：</p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// token/token.go</span></span><br><span class="line"></span><br><span class="line"><span class="keyword">const</span> (</span><br><span class="line"><span class="comment">// [...]</span></span><br><span class="line">    COLON = <span class="string">&quot;:&quot;</span></span><br><span class="line"><span class="comment">// [...]</span></span><br><span class="line">)</span><br></pre></td></tr></table></figure>
+
+<p>将:转换为token.COLON非常简单：</p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// lexer/lexer.go</span></span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="params">(l *Lexer)</span></span> NextToken() token.Token &#123;</span><br><span class="line"><span class="comment">// [...]</span></span><br><span class="line">    <span class="keyword">case</span> <span class="string">&#x27;:&#x27;</span>:</span><br><span class="line">        tok = newToken(token.COLON, l.ch)</span><br><span class="line"><span class="comment">// [...]</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h3 id="哈希字面量语法分析"><a href="#哈希字面量语法分析" class="headerlink" title="哈希字面量语法分析"></a>哈希字面量语法分析</h3><p>哈希字面量的基本语法结构：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">&#123;&lt;表达式&gt; : &lt;表达式&gt;, &lt;表达式&gt; : &lt;表达式&gt;, ... &#125;</span><br></pre></td></tr></table></figure>
+
+<p>这是一个以逗号分隔的配对列表。每对包含两个表达式：一个生成哈希键，另一个是值。键和值之间用冒号分隔。整个列表由一对大括号括起来。</p>
+<p>ast中HashLiteral的定义如下所示：</p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// ast/ast.go</span></span><br><span class="line"></span><br><span class="line"><span class="keyword">type</span> HashLiteral <span class="keyword">struct</span> &#123;</span><br><span class="line">    Token token.Token <span class="comment">// &#x27;&#123;&#x27;词法单元</span></span><br><span class="line">    Pairs <span class="keyword">map</span>[Expression]Expression</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="params">(hl *HashLiteral)</span></span> expressionNode()      &#123;&#125;</span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="params">(hl *HashLiteral)</span></span> TokenLiteral() <span class="type">string</span> &#123; <span class="keyword">return</span> hl.Token.Literal &#125;</span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="params">(hl *HashLiteral)</span></span> String() <span class="type">string</span> &#123;</span><br><span class="line">    <span class="keyword">var</span> out bytes.Buffer</span><br><span class="line"></span><br><span class="line">    pairs := []<span class="type">string</span>&#123;&#125;</span><br><span class="line">    <span class="keyword">for</span> key, value := <span class="keyword">range</span> hl.Pairs &#123;</span><br><span class="line">        pairs = <span class="built_in">append</span>(pairs, key.String()+<span class="string">&quot;:&quot;</span>+value.String())</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    out.WriteString(<span class="string">&quot;&#123;&quot;</span>)</span><br><span class="line">    out.WriteString(strings.Join(pairs, <span class="string">&quot;, &quot;</span>))</span><br><span class="line">    out.WriteString(<span class="string">&quot;&#125;&quot;</span>)</span><br><span class="line"></span><br><span class="line">    <span class="keyword">return</span> out.String()</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>由于哈希字面量的token.LBRACE在前缀位置，跟数组字面量的token.LBRACKET一样，因此可以定义parseHashLiteral方法，当作prefixParseFn来使用：</p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// parser/parser.go</span></span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">New</span><span class="params">(l *lexer.Lexer)</span></span> *Parser &#123;</span><br><span class="line"><span class="comment">// [...]</span></span><br><span class="line">    p.registerPrefix(token.LBRACE, p.parseHashLiteral)</span><br><span class="line"><span class="comment">// [...]</span></span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="params">(p *Parser)</span></span> parseHashLiteral() ast.Expression &#123;</span><br><span class="line">    hash := &amp;ast.HashLiteral&#123;Token: p.curToken&#125;</span><br><span class="line">    hash.Pairs = <span class="built_in">make</span>(<span class="keyword">map</span>[ast.Expression]ast.Expression)</span><br><span class="line"></span><br><span class="line">    <span class="keyword">for</span> !p.peekTokenIs(token.RBRACE) &#123;</span><br><span class="line">        p.nextToken()</span><br><span class="line">        key := p.parseExpression(LOWEST)</span><br><span class="line"></span><br><span class="line">        <span class="keyword">if</span> !p.expectPeek(token.COLON) &#123;</span><br><span class="line">            <span class="keyword">return</span> <span class="literal">nil</span></span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">        p.nextToken()</span><br><span class="line">        value := p.parseExpression(LOWEST)</span><br><span class="line"></span><br><span class="line">        hash.Pairs[key] = value</span><br><span class="line"></span><br><span class="line">        <span class="keyword">if</span> !p.peekTokenIs(token.RBRACE) &amp;&amp; !p.expectPeek(token.COMMA) &#123;</span><br><span class="line">            <span class="keyword">return</span> <span class="literal">nil</span></span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">if</span> !p.expectPeek(token.RBRACE) &#123;</span><br><span class="line">        <span class="keyword">return</span> <span class="literal">nil</span></span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">return</span> hash</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>其中遍历了以右花括号（token.RBRACE）结束的键）值对，然后两次调用parseExpression来分别解析键和值的表达式，最后将结果放到hash.Pairs中。</p>
+<h3 id="哈希对象"><a href="#哈希对象" class="headerlink" title="哈希对象"></a>哈希对象</h3><p>为了添加新的数据类型，除了需要扩展词法分析器和语法分析器，还需要在对象系统中表示这些数据类型。</p>
+<p>假设定义了下面这样一个新的object.Hash类型：</p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">type</span> Hash <span class="keyword">struct</span> &#123;</span><br><span class="line">  Pairs <span class="keyword">map</span>[Object]Object</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>待填坑。。。</p>
+
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/%E3%80%8A%E7%94%A8Go%E8%AF%AD%E8%A8%80%E8%87%AA%E5%88%B6%E8%A7%A3%E9%87%8A%E5%99%A8%E3%80%8B/" rel="tag"># 《用Go语言自制解释器》</a>
+          
+        </div>
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2022/12/30/%E4%B8%89-%E6%B1%82%E5%80%BC/" rel="next" title="三.求值">
+                <i class="fa fa-chevron-left"></i> 三.求值
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+
+          
+
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            Table of Contents
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            Overview
+          </li>
+        </ul>
+      
+
+      <section class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+            
+              <img class="site-author-image" itemprop="image"
+                src="/images/user.jpg"
+                alt="" />
+            
+              <p class="site-author-name" itemprop="name"></p>
+              <p class="site-description motion-element" itemprop="description"></p>
+          </div>
+
+          <nav class="site-state motion-element">
+
+            
+              <div class="site-state-item site-state-posts">
+              
+                <a href="/archives/%20%7C%7C%20archive">
+              
+                  <span class="site-state-item-count">5</span>
+                  <span class="site-state-item-name">posts</span>
+                </a>
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-categories">
+                
+                  <span class="site-state-item-count">1</span>
+                  <span class="site-state-item-name">categories</span>
+                
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-tags">
+                
+                  <span class="site-state-item-count">1</span>
+                  <span class="site-state-item-name">tags</span>
+                
+              </div>
+            
+
+          </nav>
+
+          
+
+          
+
+          
+          
+
+          
+          
+
+          
+
+        </div>
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#%E6%89%A9%E5%B1%95%E8%A7%A3%E9%87%8A%E5%99%A8"><span class="nav-number">1.</span> <span class="nav-text">扩展解释器</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%AD%97%E7%AC%A6%E4%B8%B2"><span class="nav-number">1.1.</span> <span class="nav-text">字符串</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%9C%A8%E8%AF%8D%E6%B3%95%E5%88%86%E6%9E%90%E5%99%A8%E4%B8%AD%E6%94%AF%E6%8C%81%E5%AD%97%E7%AC%A6%E4%B8%B2"><span class="nav-number">1.1.1.</span> <span class="nav-text">在词法分析器中支持字符串</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%AD%97%E7%AC%A6%E4%B8%B2%E8%AF%AD%E6%B3%95%E5%88%86%E6%9E%90"><span class="nav-number">1.1.2.</span> <span class="nav-text">字符串语法分析</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%AD%97%E7%AC%A6%E4%B8%B2%E6%B1%82%E5%80%BC"><span class="nav-number">1.1.3.</span> <span class="nav-text">字符串求值</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%AD%97%E7%AC%A6%E4%B8%B2%E8%BF%9E%E6%8E%A5"><span class="nav-number">1.1.4.</span> <span class="nav-text">字符串连接</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%86%85%E7%BD%AE%E5%87%BD%E6%95%B0"><span class="nav-number">1.2.</span> <span class="nav-text">内置函数</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%95%B0%E7%BB%84"><span class="nav-number">1.3.</span> <span class="nav-text">数组</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%9C%A8%E8%AF%8D%E6%B3%95%E5%88%86%E6%9E%90%E5%99%A8%E4%B8%AD%E6%94%AF%E6%8C%81%E6%95%B0%E7%BB%84"><span class="nav-number">1.3.1.</span> <span class="nav-text">在词法分析器中支持数组</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%95%B0%E7%BB%84%E5%AD%97%E9%9D%A2%E9%87%8F%E8%AF%AD%E6%B3%95%E5%88%86%E6%9E%90"><span class="nav-number">1.3.2.</span> <span class="nav-text">数组字面量语法分析</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E7%B4%A2%E5%BC%95%E8%BF%90%E7%AE%97%E7%AC%A6%E8%A1%A8%E8%BE%BE%E5%BC%8F%E8%AF%AD%E6%B3%95%E5%88%86%E6%9E%90"><span class="nav-number">1.3.3.</span> <span class="nav-text">索引运算符表达式语法分析</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%95%B0%E7%BB%84%E5%AD%97%E9%9D%A2%E9%87%8F%E6%B1%82%E5%80%BC"><span class="nav-number">1.3.4.</span> <span class="nav-text">数组字面量求值</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E7%B4%A2%E5%BC%95%E8%BF%90%E7%AE%97%E7%AC%A6%E8%A1%A8%E8%BE%BE%E5%BC%8F%E6%B1%82%E5%80%BC"><span class="nav-number">1.3.5.</span> <span class="nav-text">索引运算符表达式求值</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E4%B8%BA%E6%95%B0%E7%BB%84%E6%B7%BB%E5%8A%A0%E5%86%85%E7%BD%AE%E5%87%BD%E6%95%B0"><span class="nav-number">1.3.6.</span> <span class="nav-text">为数组添加内置函数</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%93%88%E5%B8%8C%E8%A1%A8"><span class="nav-number">1.4.</span> <span class="nav-text">哈希表</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%93%88%E5%B8%8C%E5%AD%97%E9%9D%A2%E9%87%8F%E8%AF%8D%E6%B3%95%E5%88%86%E6%9E%90"><span class="nav-number">1.4.1.</span> <span class="nav-text">哈希字面量词法分析</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%93%88%E5%B8%8C%E5%AD%97%E9%9D%A2%E9%87%8F%E8%AF%AD%E6%B3%95%E5%88%86%E6%9E%90"><span class="nav-number">1.4.2.</span> <span class="nav-text">哈希字面量语法分析</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%93%88%E5%B8%8C%E5%AF%B9%E8%B1%A1"><span class="nav-number">1.4.3.</span> <span class="nav-text">哈希对象</span></a></li></ol></li></ol></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; <span itemprop="copyrightYear">2022</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">John Doe</span>
+
+  
+</div>
+
+
+  <div class="powered-by">Powered by <a class="theme-link" target="_blank" href="https://hexo.io">Hexo</a></div>
+
+
+
+  <span class="post-meta-divider">|</span>
+
+
+
+  <div class="theme-info">Theme &mdash; <a class="theme-link" target="_blank" href="https://github.com/iissnan/hexo-theme-next">NexT.Gemini</a> v5.1.4</div>
+
+
+
+
+        
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
+    
+
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+  
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=5.1.4"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=5.1.4"></script>
+
+
+
+  
+  
+
+
+  <script type="text/javascript" src="/js/src/affix.js?v=5.1.4"></script>
+
+  <script type="text/javascript" src="/js/src/schemes/pisces.js?v=5.1.4"></script>
+
+
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=5.1.4"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  
+
+
+
+
+	
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+  
+
+  
+
+  
+  
+
+  
+
+  
+
+  
+
+</body>
+</html>

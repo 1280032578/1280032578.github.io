@@ -1,0 +1,965 @@
+<!DOCTYPE html>
+
+
+
+  
+
+
+<html class="theme-next gemini use-motion" lang="en">
+<head>
+  <meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+<meta name="theme-color" content="#222">
+
+
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="/lib/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css" />
+
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css" />
+
+<link href="/css/main.css?v=5.1.4" rel="stylesheet" type="text/css" />
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png?v=5.1.4">
+
+
+  <link rel="mask-icon" href="/images/logo.svg?v=5.1.4" color="#222">
+
+
+
+
+
+  <meta name="keywords" content="《用Go语言自制解释器》," />
+
+
+
+
+
+
+
+
+
+
+<meta name="description" content="《用Go语言自制解释器》-语法分析">
+<meta property="og:type" content="article">
+<meta property="og:title" content="二.语法分析">
+<meta property="og:url" content="http://example.com/2022/12/30/%E4%BA%8C-%E8%AF%AD%E6%B3%95%E5%88%86%E6%9E%90/index.html">
+<meta property="og:site_name" content="Penge">
+<meta property="og:description" content="《用Go语言自制解释器》-语法分析">
+<meta property="og:locale" content="en_US">
+<meta property="og:image" content="http://example.com/2022/12/30/%E4%BA%8C-%E8%AF%AD%E6%B3%95%E5%88%86%E6%9E%90/Blog/source_posts/%E4%BA%8C-%E8%AF%AD%E6%B3%95%E5%88%86%E6%9E%90.assets/image-20221230212134226.png">
+<meta property="article:published_time" content="2022-12-30T13:12:05.000Z">
+<meta property="article:modified_time" content="2022-12-30T13:44:53.383Z">
+<meta property="article:author" content="John Doe">
+<meta property="article:tag" content="《用Go语言自制解释器》">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="http://example.com/2022/12/30/%E4%BA%8C-%E8%AF%AD%E6%B3%95%E5%88%86%E6%9E%90/Blog/source_posts/%E4%BA%8C-%E8%AF%AD%E6%B3%95%E5%88%86%E6%9E%90.assets/image-20221230212134226.png">
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '',
+    scheme: 'Gemini',
+    version: '5.1.4',
+    sidebar: {"position":"left","display":"post","offset":12,"b2t":false,"scrollpercent":false,"onmobile":false},
+    fancybox: true,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    duoshuo: {
+      userId: '0',
+      author: 'Author'
+    },
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+
+  <link rel="canonical" href="http://example.com/2022/12/30/二-语法分析/"/>
+
+
+
+
+
+  <title>二.语法分析 | Penge</title>
+  
+
+
+
+
+
+
+
+
+<meta name="generator" content="Hexo 6.3.0"></head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="en">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/"  class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">Penge</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <p class="site-subtitle"></p>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/%20" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-home"></i> <br />
+            
+            Home
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-tags">
+          <a href="/tags/%20" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-tags"></i> <br />
+            
+            Tags
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-categories">
+          <a href="/categories/%20" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-th"></i> <br />
+            
+            Categories
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives/%20" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-archive"></i> <br />
+            
+            Archives
+          </a>
+        </li>
+      
+
+      
+    </ul>
+  
+
+  
+</nav>
+
+
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://example.com/2022/12/30/%E4%BA%8C-%E8%AF%AD%E6%B3%95%E5%88%86%E6%9E%90/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/user.jpg">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Penge">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">二.语法分析</h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">Posted on</span>
+              
+              <time title="Post created" itemprop="dateCreated datePublished" datetime="2022-12-30T21:12:05+08:00">
+                2022-12-30
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">In</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/Monkey%E8%A7%A3%E9%87%8A%E5%99%A8/" itemprop="url" rel="index">
+                    <span itemprop="name">Monkey解释器</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+              <div class="post-description">
+                  《用Go语言自制解释器》-语法分析
+              </div>
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <h1 id="语法分析"><a href="#语法分析" class="headerlink" title="语法分析"></a>语法分析</h1><h2 id="概念"><a href="#概念" class="headerlink" title="概念"></a>概念</h2><p>语法分析器是一个软件组件，用于将输入的数据（通常是文本）构建成一个数据结构，通常是某种解析树、抽象语法树或其他层次结构。它将输入的内容以结构化形式表示，并在此过程中检查语法是否正确。（摘抄自维基百科）</p>
+<p>在大多数解释器和编译器中，<strong>用于源代码内部表示的数据结构称为“语法树”或“抽象语法树”（Abstract Syntax Tree，AST）</strong>。“抽象”是指AST中省略了源代码中可见的某些细节。比如分号、换行符、空格、注释、花括号、方括号和括号等信息不会出现在AST中，它们只是用来指导语法分析器如何构造AST。</p>
+<p>直观来看一下下面这个<code>if-else</code>语句对应的抽象语法树。</p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br></pre></td><td class="code"><pre><span class="line">&gt; <span class="keyword">var</span> input = <span class="string">&#x27;if (3 * 5 &gt; 10) &#123; return &quot;hello&quot;; &#125; else &#123; return &quot;goodbye&quot;; &#125;&#x27;</span>;</span><br><span class="line">&gt; <span class="keyword">var</span> tokens = MagicLexer.parse(input);</span><br><span class="line">&gt; MagicParser.parse(tokens);</span><br><span class="line">&#123;</span><br><span class="line">  <span class="keyword">type</span>: <span class="string">&quot;if-statement&quot;</span>,</span><br><span class="line">  condition: &#123;</span><br><span class="line">    <span class="keyword">type</span>: <span class="string">&quot;operator-expression&quot;</span>,</span><br><span class="line">    operator: <span class="string">&quot;&gt;&quot;</span>,</span><br><span class="line">    left: &#123;</span><br><span class="line">      <span class="keyword">type</span>: <span class="string">&quot;operator-expression&quot;</span>,</span><br><span class="line">      operator: <span class="string">&quot;*&quot;</span>,</span><br><span class="line">      left: &#123; <span class="keyword">type</span>: <span class="string">&quot;integer-literal&quot;</span>, value: <span class="number">3</span> &#125;,</span><br><span class="line">      right: &#123; <span class="keyword">type</span>: <span class="string">&quot;integer-literal&quot;</span>, value: <span class="number">5</span> &#125;</span><br><span class="line">    &#125;,</span><br><span class="line">    right: &#123; <span class="keyword">type</span>: <span class="string">&quot;integer-literal&quot;</span>, value: <span class="number">10</span> &#125;</span><br><span class="line">  &#125;,</span><br><span class="line">  consequence: &#123;</span><br><span class="line">    <span class="keyword">type</span>: <span class="string">&quot;return-statement&quot;</span>,</span><br><span class="line">    returnValue: &#123; <span class="keyword">type</span>: <span class="string">&quot;string-literal&quot;</span>, value: <span class="string">&quot;hello&quot;</span> &#125;</span><br><span class="line">  &#125;,</span><br><span class="line">  alternative: &#123;</span><br><span class="line">    <span class="keyword">type</span>: <span class="string">&quot;return-statement&quot;</span>,</span><br><span class="line">    returnValue: &#123; <span class="keyword">type</span>: <span class="string">&quot;string-literal&quot;</span>, value: <span class="string">&quot;goodbye&quot;</span> &#125;</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>通过上方这个例子，我们就可以更加清晰的了解到AST。重新回顾一下<strong>语法分析的概念</strong>，语法分析器将文本或词法单元形式的源代码作为输入，产生一个表示该源代码的数据结构。在建立数据结构时，语法分析器会解析输入，检查其是否符合预期的结构。这个过程就称为语法分析。</p>
+<p>✳我们接下来编写的语法分析器是<strong>递归下降语法分析器</strong>。具体来说，它是<strong>基于自上而下的运算符优先级分析法的语法分析器</strong>。因为发明人是沃恩·普拉特（Vaughan Pratt），所以有时它也称为<strong>普拉特语法分析器</strong>。</p>
+<h2 id="解析let语句"><a href="#解析let语句" class="headerlink" title="解析let语句"></a>解析let语句</h2><p>在解析Monkey语言的let语句之前，先学习一下AST。</p>
+<blockquote>
+<p><strong>AST基本构建</strong></p>
+</blockquote>
+<p>现在，我们希望语法分析器生成AST，让这个AST可以准确表示let语句中包含的信息。</p>
+<p><strong>语句 VS 表达式</strong>：语句，不会产生值。表达式，会产生值。</p>
+<p>在设计上，我们使得<strong>AST</strong>拥有两种不同类型的节点：<strong>表达式和语句</strong>。</p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">//ast/ast.go</span></span><br><span class="line"><span class="keyword">package</span> ast</span><br><span class="line"><span class="comment">// 这里有3个接口，分别称为Node、Statement和Expression</span></span><br><span class="line"><span class="comment">// The base Node interface</span></span><br><span class="line"><span class="keyword">type</span> Node <span class="keyword">interface</span> &#123;</span><br><span class="line">	TokenLiteral() <span class="type">string</span> <span class="comment">// 该方法返回与其关联的词法单元的字面量</span></span><br><span class="line">	String() <span class="type">string</span>       <span class="comment">// </span></span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">// 所有语句实现这个接口，All statement nodes implement this</span></span><br><span class="line"><span class="keyword">type</span> Statement <span class="keyword">interface</span> &#123;</span><br><span class="line">	Node</span><br><span class="line">	statementNode()</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">// 所有表达式实现这个接口，All expression nodes implement this</span></span><br><span class="line"><span class="keyword">type</span> Expression <span class="keyword">interface</span> &#123;</span><br><span class="line">	Node</span><br><span class="line">	expressionNode()</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>第一个Node实现</p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">//ast/ast.go</span></span><br><span class="line"><span class="comment">/*</span></span><br><span class="line"><span class="comment">这个Program节点将成为语法分析器生成的每个AST的根节点。</span></span><br><span class="line"><span class="comment">每个有效的Monkey程序都是一系列位于Program.Statements中的语句。</span></span><br><span class="line"><span class="comment">Program.Statements是一个切片，其中有实现Statement接口的AST节点。</span></span><br><span class="line"><span class="comment">*/</span></span><br><span class="line"><span class="keyword">type</span> Program <span class="keyword">struct</span> &#123;</span><br><span class="line">	Statements []Statement</span><br><span class="line">&#125;</span><br><span class="line"><span class="comment">//TokenLiteral()是对相关的接口进行实现</span></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="params">(p *Program)</span></span> TokenLiteral() <span class="type">string</span> &#123;</span><br><span class="line">	<span class="keyword">if</span> <span class="built_in">len</span>(p.Statements) &gt; <span class="number">0</span> &#123;</span><br><span class="line">		<span class="keyword">return</span> p.Statements[<span class="number">0</span>].TokenLiteral()</span><br><span class="line">	&#125; <span class="keyword">else</span> &#123;</span><br><span class="line">		<span class="keyword">return</span> <span class="string">&quot;&quot;</span></span><br><span class="line">	&#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<blockquote>
+<p><strong>解析let语句</strong></p>
+</blockquote>
+<p>完成AST的基本构建之后，开始解析let语句。</p>
+<p>在Monkey语句中，<strong>let语句</strong>表示如下形式：</p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">let x = <span class="number">5</span>;</span><br><span class="line">let y = <span class="number">10</span>;</span><br><span class="line">let foobar = add(<span class="number">5</span>, <span class="number">5</span>);</span><br><span class="line">let barfoo = <span class="number">5</span> * <span class="number">5</span> / <span class="number">10</span> + <span class="number">18</span> - add(<span class="number">5</span>, <span class="number">5</span>) + multiply(<span class="number">124</span>);</span><br><span class="line">let anotherName = barfoo;</span><br></pre></td></tr></table></figure>
+
+<p>显然，我们需要分析let语句形式，let语句可以写成下方形式。</p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">let &lt;标识符&gt; = &lt;表达式&gt;;</span><br></pre></td></tr></table></figure>
+
+<p>显然，我们需要为let语句应该有3部分组成：1.let关键字 2.标识符 3.表达式。</p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// ast/ast.go</span></span><br><span class="line"></span><br><span class="line"><span class="keyword">import</span> <span class="string">&quot;monkey/token&quot;</span></span><br><span class="line"></span><br><span class="line"><span class="comment">// [...]</span></span><br><span class="line"></span><br><span class="line"><span class="keyword">type</span> LetStatement <span class="keyword">struct</span> &#123;</span><br><span class="line">    Token token.Token <span class="comment">// token.LET词法单元</span></span><br><span class="line">    Name *Identifier  <span class="comment">// 标识符</span></span><br><span class="line">    Value Expression  <span class="comment">// 表达式</span></span><br><span class="line">&#125;</span><br><span class="line"><span class="comment">//let是个语句，实现statement接口</span></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="params">(ls *LetStatement)</span></span> statementNode()       &#123;&#125;</span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="params">(ls *LetStatement)</span></span> TokenLiteral() <span class="type">string</span> &#123; <span class="keyword">return</span> ls.Token.Literal &#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">type</span> Identifier <span class="keyword">struct</span> &#123;</span><br><span class="line">    Token token.Token <span class="comment">// token.IDENT词法单元</span></span><br><span class="line">    Value <span class="type">string</span></span><br><span class="line">&#125;</span><br><span class="line"><span class="comment">//标识符也应看作表达式，有些情况标识符中就表示值</span></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="params">(i *Identifier)</span></span> expressionNode()      &#123;&#125;</span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="params">(i *Identifier)</span></span> TokenLiteral() <span class="type">string</span> &#123; <span class="keyword">return</span> i.Token.Literal &#125;</span><br></pre></td></tr></table></figure>
+
+<p>我们就可以画出let语句的AST表示图：</p>
+<p><img src="/2022/12/30/%E4%BA%8C-%E8%AF%AD%E6%B3%95%E5%88%86%E6%9E%90/Blog\source_posts\二-语法分析.assets\image-20221230212134226.png" alt="image-20221230212134226"></p>
+<p>完成上述的工作后， 我们可以开始着手语法分析器parser了。</p>
+<p>首先需要先定义parser结构体并进行初始化操作。</p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// parser/parser.go</span></span><br><span class="line"></span><br><span class="line"><span class="keyword">package</span> parser</span><br><span class="line"></span><br><span class="line"><span class="keyword">import</span> (</span><br><span class="line">    <span class="string">&quot;monkey/ast&quot;</span></span><br><span class="line">    <span class="string">&quot;monkey/lexer&quot;</span></span><br><span class="line">    <span class="string">&quot;monkey/token&quot;</span></span><br><span class="line">)</span><br><span class="line"></span><br><span class="line"><span class="keyword">type</span> Parser <span class="keyword">struct</span> &#123;</span><br><span class="line">    l *lexer.Lexer</span><br><span class="line">	<span class="comment">//...</span></span><br><span class="line">    curToken token.Token <span class="comment">//指向输入中的当前词法单元</span></span><br><span class="line">    peekToken token.Token <span class="comment">//指向输入中的下一个词法单元</span></span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">New</span><span class="params">(l *lexer.Lexer)</span></span> *Parser &#123;</span><br><span class="line">    p := &amp;Parser&#123;l: l&#125;</span><br><span class="line">    <span class="comment">// 读取两个词法单元，以设置curToken和peekToken</span></span><br><span class="line">    p.nextToken()</span><br><span class="line">    p.nextToken()</span><br><span class="line">    <span class="keyword">return</span> p</span><br><span class="line">&#125;</span><br><span class="line"><span class="comment">//NextToken()能不断获取输入中的下一个词法单元</span></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="params">(p *Parser)</span></span> nextToken() &#123;</span><br><span class="line">    p.curToken = p.peekToken</span><br><span class="line">    p.peekToken = p.l.NextToken()</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="params">(p *Parser)</span></span> ParseProgram() *ast.Program &#123;</span><br><span class="line">    <span class="keyword">return</span> <span class="literal">nil</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>完成该操作之后，可以开始填充ParseProgram函数(递归下降语法分析器)，这里先给出其伪代码形式：</p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">//递归下降语法分析器</span></span><br><span class="line">function parseProgram() &#123;</span><br><span class="line">  program = newProgramASTNode() <span class="comment">// New一个节点</span></span><br><span class="line">  <span class="comment">//前进一位字符Token</span></span><br><span class="line">  advanceTokens()</span><br><span class="line">  <span class="comment">//判断不为文件末尾</span></span><br><span class="line">  <span class="keyword">for</span> (currentToken() != EOF_TOKEN) &#123;</span><br><span class="line">    statement = null</span><br><span class="line">	<span class="comment">//调用相应的语句</span></span><br><span class="line">    <span class="keyword">if</span> (currentToken() == LET_TOKEN) &#123;</span><br><span class="line">      statement = parseLetStatement()</span><br><span class="line">    &#125; <span class="keyword">else</span> <span class="keyword">if</span> (currentToken() == RETURN_TOKEN) &#123;</span><br><span class="line">      statement = parseReturnStatement()</span><br><span class="line">    &#125; <span class="keyword">else</span> <span class="keyword">if</span> (currentToken() == IF_TOKEN) &#123;</span><br><span class="line">      statement = parseIfStatement()</span><br><span class="line">    &#125;</span><br><span class="line">	<span class="comment">//加入相应语句</span></span><br><span class="line">    <span class="keyword">if</span> (statement != null) &#123;</span><br><span class="line">      program.Statements.push(statement)</span><br><span class="line">    &#125;</span><br><span class="line">  <span class="comment">//前进一位字符Token</span></span><br><span class="line">    advanceTokens()</span><br><span class="line">  &#125;</span><br><span class="line"></span><br><span class="line">  <span class="keyword">return</span> program</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">function parseLetStatement() &#123;</span><br><span class="line">  advanceTokens()</span><br><span class="line">  <span class="comment">//获得标识符</span></span><br><span class="line">  identifier = parseIdentifier()</span><br><span class="line"></span><br><span class="line">  advanceTokens()</span><br><span class="line">  <span class="comment">//判断是否满足let结构</span></span><br><span class="line">  <span class="keyword">if</span> currentToken() != EQUAL_TOKEN &#123;</span><br><span class="line">    parseError(<span class="string">&quot;no equal sign!&quot;</span>)</span><br><span class="line">    <span class="keyword">return</span> null</span><br><span class="line">  &#125;</span><br><span class="line"></span><br><span class="line">  advanceTokens()</span><br><span class="line">  <span class="comment">//解析=后面的表达式</span></span><br><span class="line">  value = parseExpression()</span><br><span class="line"></span><br><span class="line">  variableStatement = newVariableStatementASTNode()</span><br><span class="line">  variableStatement.identifier = identifier</span><br><span class="line">  variableStatement.value = value</span><br><span class="line">  <span class="keyword">return</span> variableStatement</span><br><span class="line">&#125;</span><br><span class="line"><span class="comment">//获得标识符</span></span><br><span class="line">function parseIdentifier() &#123;</span><br><span class="line">  identifier = newIdentifierASTNode()</span><br><span class="line">  identifier.token = currentToken()</span><br><span class="line">  <span class="keyword">return</span> identifier</span><br><span class="line">&#125;</span><br><span class="line"><span class="comment">//解析表达式部分</span></span><br><span class="line">function parseExpression() &#123;</span><br><span class="line">  <span class="keyword">if</span> (currentToken() == INTEGER_TOKEN) &#123;</span><br><span class="line">    <span class="keyword">if</span> (nextToken() == PLUS_TOKEN) &#123;</span><br><span class="line">      <span class="keyword">return</span> parseOperatorExpression()</span><br><span class="line">    &#125; <span class="keyword">else</span> <span class="keyword">if</span> (nextToken() == SEMICOLON_TOKEN) &#123;</span><br><span class="line">      <span class="keyword">return</span> parseIntegerLiteral()</span><br><span class="line">    &#125;</span><br><span class="line">  &#125; <span class="keyword">else</span> <span class="keyword">if</span> (currentToken() == LEFT_PAREN) &#123;</span><br><span class="line">    <span class="keyword">return</span> parseGroupedExpression()</span><br><span class="line">  &#125;</span><br><span class="line"><span class="comment">// [...]</span></span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">function parseOperatorExpression() &#123;</span><br><span class="line">  operatorExpression = newOperatorExpression()</span><br><span class="line"></span><br><span class="line">  operatorExpression.left = parseIntegerLiteral()</span><br><span class="line">  advanceTokens()</span><br><span class="line">  operatorExpression.operator = currentToken()</span><br><span class="line">  advanceTokens()</span><br><span class="line">  operatorExpression.right = parseExpression()</span><br><span class="line"></span><br><span class="line">  <span class="keyword">return</span> operatorExpression</span><br><span class="line">&#125;</span><br><span class="line"><span class="comment">// [...]</span></span><br></pre></td></tr></table></figure>
+
+<p>上方伪代码的整体思路比较清晰简单。</p>
+<p>接下来就可以将伪代码转化成实际的代码，我们首先填充Parser中的ParseProgram()方法。</p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// parser/parser.go</span></span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="params">(p *Parser)</span></span> ParseProgram() *ast.Program &#123;</span><br><span class="line">    <span class="comment">//构造AST的根节点，也就是*ast.Program</span></span><br><span class="line">    program := &amp;ast.Program&#123;&#125;</span><br><span class="line">    program.Statements = []ast.Statement&#123;&#125;</span><br><span class="line">	<span class="comment">//遍历输入中的每个词法单元，直到遇见token.EOF词法单元</span></span><br><span class="line">    <span class="keyword">for</span> p.curToken.Type != token.EOF &#123;</span><br><span class="line">        <span class="comment">//解析每一条语句</span></span><br><span class="line">        stmt := p.parseStatement()</span><br><span class="line">        <span class="keyword">if</span> stmt != <span class="literal">nil</span> &#123;</span><br><span class="line">            <span class="comment">//将返回值会被添加到AST根节点的Statements切片中</span></span><br><span class="line">            program.Statements = <span class="built_in">append</span>(program.Statements, stmt)</span><br><span class="line">        &#125;</span><br><span class="line">        p.nextToken()</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="comment">//所有内容都解析完成后，就返回*ast.Program根节点。</span></span><br><span class="line">    <span class="keyword">return</span> program</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>之后完成<code>parseStatement</code>和<code>parseLetStatement</code>函数</p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// parser/parser.go</span></span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="params">(p *Parser)</span></span> parseStatement() ast.Statement &#123;</span><br><span class="line">	<span class="keyword">switch</span> p.curToken.Type &#123;</span><br><span class="line">	<span class="keyword">case</span> token.LET:</span><br><span class="line">		<span class="keyword">return</span> p.parseLetStatement()</span><br><span class="line">	<span class="keyword">default</span>:</span><br><span class="line">		<span class="comment">//return .</span></span><br><span class="line">	&#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="params">(p *Parser)</span></span> parseLetStatement() *ast.LetStatement &#123;</span><br><span class="line">	stmt := &amp;ast.LetStatement&#123;Token: p.curToken&#125;</span><br><span class="line">	<span class="comment">//判断下一个是否为标识符</span></span><br><span class="line">	<span class="keyword">if</span> !p.expectPeek(token.IDENT) &#123;</span><br><span class="line">		<span class="keyword">return</span> <span class="literal">nil</span></span><br><span class="line">	&#125;</span><br><span class="line"></span><br><span class="line">	stmt.Name = &amp;ast.Identifier&#123;Token: p.curToken, Value: p.curToken.Literal&#125;</span><br><span class="line">	<span class="comment">//判断是否是等号</span></span><br><span class="line">	<span class="keyword">if</span> !p.expectPeek(token.ASSIGN) &#123;</span><br><span class="line">		<span class="keyword">return</span> <span class="literal">nil</span></span><br><span class="line">	&#125;</span><br><span class="line"></span><br><span class="line">	p.nextToken()</span><br><span class="line">	<span class="comment">//解析表达式值</span></span><br><span class="line">	stmt.Value = p.parseExpression(LOWEST)</span><br><span class="line"></span><br><span class="line">	<span class="keyword">if</span> p.peekTokenIs(token.SEMICOLON) &#123;</span><br><span class="line">		p.nextToken()</span><br><span class="line">	&#125;</span><br><span class="line"></span><br><span class="line">	<span class="keyword">return</span> stmt</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>上面就是解析Let语句的基本思路，之后我们可以给程序添加报错信息以及测试内容。</p>
+<p>报错的添加如下所示：</p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// parser/parser.go</span></span><br><span class="line"></span><br><span class="line"><span class="keyword">import</span> (</span><br><span class="line"><span class="comment">// [...]</span></span><br><span class="line">    <span class="string">&quot;fmt&quot;</span></span><br><span class="line">)</span><br><span class="line"></span><br><span class="line"><span class="keyword">type</span> Parser <span class="keyword">struct</span> &#123;</span><br><span class="line"><span class="comment">// [...]</span></span><br><span class="line">    errors []<span class="type">string</span></span><br><span class="line"><span class="comment">// [...]</span></span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">New</span><span class="params">(l *lexer.Lexer)</span></span> *Parser &#123;</span><br><span class="line">    p := &amp;Parser&#123;</span><br><span class="line">        l: l,</span><br><span class="line">        errors: []<span class="type">string</span>&#123;&#125;,</span><br><span class="line">    &#125;</span><br><span class="line"><span class="comment">// [...]</span></span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="params">(p *Parser)</span></span> Errors() []<span class="type">string</span> &#123;</span><br><span class="line">    <span class="keyword">return</span> p.errors</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="params">(p *Parser)</span></span> peekError(t token.TokenType) &#123;</span><br><span class="line">    msg := fmt.Sprintf(<span class="string">&quot;expected next token to be %s, got %s instead&quot;</span>,</span><br><span class="line">        t, p.peekToken.Type)</span><br><span class="line">    p.errors = <span class="built_in">append</span>(p.errors, msg)</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+
+
+<h2 id="解析return语句"><a href="#解析return语句" class="headerlink" title="解析return语句"></a>解析return语句</h2><p>Monkey中的return语句如下</p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">return</span> <span class="number">5</span>;</span><br><span class="line"><span class="keyword">return</span> <span class="number">10</span>;</span><br><span class="line"><span class="keyword">return</span> add(<span class="number">15</span>);</span><br></pre></td></tr></table></figure>
+
+<p>有了之前的经验，return语句表示成</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">return</span> &lt;表达式&gt;;</span><br></pre></td></tr></table></figure>
+
+<p>与之前记录不同的是，解析return先写测试代码</p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// parser/parser_test.go</span></span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">TestReturnStatements</span><span class="params">(t *testing.T)</span></span> &#123;</span><br><span class="line">input := <span class="string">`</span></span><br><span class="line"><span class="string">return 5;</span></span><br><span class="line"><span class="string">return 10;</span></span><br><span class="line"><span class="string">return 993 322;</span></span><br><span class="line"><span class="string">`</span></span><br><span class="line">    l := lexer.New(input) <span class="comment">//定义词法分析</span></span><br><span class="line">    p := New(l)          <span class="comment">//定义语法分析</span></span><br><span class="line"></span><br><span class="line">    program := p.ParseProgram() <span class="comment">//分析程序</span></span><br><span class="line">    checkParserErrors(t, p)   <span class="comment">//输出Errors</span></span><br><span class="line">	<span class="comment">//简单的逻辑判断</span></span><br><span class="line">    <span class="keyword">if</span> <span class="built_in">len</span>(program.Statements) != <span class="number">3</span> &#123;</span><br><span class="line">        t.Fatalf(<span class="string">&quot;program.Statements does not contain 3 statements. got=%d&quot;</span>,</span><br><span class="line">            <span class="built_in">len</span>(program.Statements))</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">for</span> _, stmt := <span class="keyword">range</span> program.Statements &#123;</span><br><span class="line">        returnStmt, ok := stmt.(*ast.ReturnStatement)</span><br><span class="line">        <span class="keyword">if</span> !ok &#123;</span><br><span class="line">            t.Errorf(<span class="string">&quot;stmt not *ast.ReturnStatement. got=%T&quot;</span>, stmt)</span><br><span class="line">            <span class="keyword">continue</span></span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">if</span> returnStmt.TokenLiteral() != <span class="string">&quot;return&quot;</span> &#123;</span><br><span class="line">            t.Errorf(<span class="string">&quot;returnStmt.TokenLiteral not &#x27;return&#x27;, got %q&quot;</span>,</span><br><span class="line">                returnStmt.TokenLiteral())</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>return语句仅由关键字return和表达式组成，因此ast.ReturnStatement的定义非常简单</p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">//ast/ast.go</span></span><br><span class="line"><span class="keyword">type</span> ReturnStatement <span class="keyword">struct</span> &#123;</span><br><span class="line">	Token       token.Token <span class="comment">// the &#x27;return&#x27; token</span></span><br><span class="line">	ReturnValue Expression</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="params">(rs *ReturnStatement)</span></span> statementNode()       &#123;&#125;</span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="params">(rs *ReturnStatement)</span></span> TokenLiteral() <span class="type">string</span> &#123; <span class="keyword">return</span> rs.Token.Literal &#125;</span><br></pre></td></tr></table></figure>
+
+<p>修改parseStatement方法</p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// parser/parser.go</span></span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="params">(p *Parser)</span></span> parseStatement() ast.Statement &#123;</span><br><span class="line">    <span class="keyword">switch</span> p.curToken.Type &#123;</span><br><span class="line">    <span class="keyword">case</span> token.LET:</span><br><span class="line">        <span class="keyword">return</span> p.parseLetStatement()</span><br><span class="line">    <span class="keyword">case</span> token.RETURN:</span><br><span class="line">        <span class="keyword">return</span> p.parseReturnStatement()</span><br><span class="line">    <span class="keyword">default</span>:</span><br><span class="line">        <span class="keyword">return</span> <span class="literal">nil</span></span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"><span class="comment">//处理return语句</span></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="params">(p *Parser)</span></span> parseReturnStatement() *ast.ReturnStatement &#123;</span><br><span class="line">	stmt := &amp;ast.ReturnStatement&#123;Token: p.curToken&#125;</span><br><span class="line">	</span><br><span class="line">	p.nextToken()</span><br><span class="line">	<span class="comment">//解析表达式</span></span><br><span class="line">	stmt.ReturnValue = p.parseExpression(LOWEST)</span><br><span class="line">	<span class="comment">//判断是否为;</span></span><br><span class="line">	<span class="keyword">if</span> p.peekTokenIs(token.SEMICOLON) &#123;</span><br><span class="line">		p.nextToken()</span><br><span class="line">	&#125;</span><br><span class="line">	<span class="keyword">return</span> stmt</span><br><span class="line">&#125;</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+<p>由于处理表达式需要再之后再记录，因此可以暂时跳过这个部分。</p>
+<h2 id="解析表达式"><a href="#解析表达式" class="headerlink" title="解析表达式"></a>解析表达式</h2><p>解析表达式是编写语法分析器中最核心的部分。这里用<strong>自上而下的运算符优先级分析（也称普拉特解析法）对表达式进行递归解析。</strong></p>
+<p>解析表达式的第一步是在AST中添加表达式语句。</p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">//ast/ast.go</span></span><br><span class="line"></span><br><span class="line"><span class="keyword">type</span> ExpressionStatement <span class="keyword">struct</span> &#123;</span><br><span class="line">	Token      token.Token <span class="comment">// the first token of the expression</span></span><br><span class="line">	Expression Expression</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="params">(es *ExpressionStatement)</span></span> statementNode()       &#123;&#125;</span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="params">(es *ExpressionStatement)</span></span> TokenLiteral() <span class="type">string</span> &#123; <span class="keyword">return</span> es.Token.Literal &#125;</span><br></pre></td></tr></table></figure>
+
+<blockquote>
+<p> <strong>实现普拉特语法分析器</strong></p>
+</blockquote>
+<p><strong>普拉特语法分析器</strong>的主要思想是将解析函数（普拉特称为语义代码）与词法单元类型相关联。每当遇到某个词法单元类型时，都会调用相关联的解析函数来解析对应的表达式，最后返回生成的AST节点。<strong>每个词法单元类型最多可以关联两个解析函数，这取决于词法单元的位置，是位于前缀位置还是中缀位置。</strong></p>
+<p>实现普拉特语法分析器</p>
+<p>第一步是<strong>设置关联</strong>。下面定义了两种类型的函数，即前缀解析函数和中缀解析函数：</p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// parser/parser.go</span></span><br><span class="line"></span><br><span class="line"><span class="keyword">type</span> (</span><br><span class="line">    prefixParseFn <span class="function"><span class="keyword">func</span><span class="params">()</span></span> ast.Expression</span><br><span class="line">    infixParseFn  <span class="function"><span class="keyword">func</span><span class="params">(ast.Expression)</span></span> ast.Expression <span class="comment">//中缀需要前缀传送的表达式</span></span><br><span class="line">)</span><br></pre></td></tr></table></figure>
+
+<p>第二步是给<strong>Parser结构添加了两个映射（map）</strong>，为使语法分析器为当前词法单元类型正确调用prefixParseFn或infixParseFn。</p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">//parser/parser.go</span></span><br><span class="line"></span><br><span class="line"><span class="keyword">type</span> Parser <span class="keyword">struct</span> &#123;</span><br><span class="line">	l      *lexer.Lexer</span><br><span class="line">	errors []<span class="type">string</span></span><br><span class="line"></span><br><span class="line">	curToken  token.Token</span><br><span class="line">	peekToken token.Token</span><br><span class="line">	<span class="comment">/*</span></span><br><span class="line"><span class="comment">	建立映射:</span></span><br><span class="line"><span class="comment">	检查相应的中缀映射或前缀映射是否具有与curToken.Type相关联的解析函数</span></span><br><span class="line"><span class="comment">	*/</span></span><br><span class="line">	prefixParseFns <span class="keyword">map</span>[token.TokenType]prefixParseFn</span><br><span class="line">	infixParseFns  <span class="keyword">map</span>[token.TokenType]infixParseFn</span><br><span class="line">&#125;</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+<p>第三步为<strong>Parser提供了两个辅助方法</strong>，用来向这些映射中添加内容</p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// parser/parser.go</span></span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="params">(p *Parser)</span></span> registerPrefix(tokenType token.TokenType, fn prefixParseFn) &#123;</span><br><span class="line">    p.prefixParseFns[tokenType] = fn</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="params">(p *Parser)</span></span> registerInfix(tokenType token.TokenType, fn infixParseFn) &#123;</span><br><span class="line">    p.infixParseFns[tokenType] = fn</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h3 id="标识符"><a href="#标识符" class="headerlink" title="标识符"></a>标识符</h3><p>标识符可能算是Monkey语言中最简单的表达式类型。</p>
+<p>处理标识符的第一步是扩展语法分析器的parseStatement()方法，以便解析表达式语句。</p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// parser/parser.go</span></span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="params">(p *Parser)</span></span> parseStatement() ast.Statement &#123;</span><br><span class="line">    <span class="keyword">switch</span> p.curToken.Type &#123;</span><br><span class="line">    <span class="keyword">case</span> token.LET:</span><br><span class="line">        <span class="keyword">return</span> p.parseLetStatement()</span><br><span class="line">    <span class="keyword">case</span> token.RETURN:</span><br><span class="line">        <span class="keyword">return</span> p.parseReturnStatement()</span><br><span class="line">    <span class="keyword">default</span>:</span><br><span class="line">        <span class="keyword">return</span> p.parseExpressionStatement()</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>parseExpressionStatement方法如下：</p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// parser/parser.go</span></span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="params">(p *Parser)</span></span> parseExpressionStatement() *ast.ExpressionStatement &#123;</span><br><span class="line">	stmt := &amp;ast.ExpressionStatement&#123;Token: p.curToken&#125;</span><br><span class="line">	<span class="comment">//解析表达式</span></span><br><span class="line">	stmt.Expression = p.parseExpression(LOWEST)</span><br><span class="line">	<span class="comment">//判断是否为;</span></span><br><span class="line">	<span class="keyword">if</span> p.peekTokenIs(token.SEMICOLON) &#123;</span><br><span class="line">		p.nextToken()</span><br><span class="line">	&#125;</span><br><span class="line"></span><br><span class="line">	<span class="keyword">return</span> stmt</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>因为LOWEST尚未定义，为每个符号定义上优先级。</p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// parser/parser.go</span></span><br><span class="line"></span><br><span class="line"><span class="keyword">const</span> (</span><br><span class="line">	_ <span class="type">int</span> = <span class="literal">iota</span> <span class="comment">//iota为这些常量设置逐个递增的数值</span></span><br><span class="line">	LOWEST</span><br><span class="line">	EQUALS      <span class="comment">// ==</span></span><br><span class="line">	LESSGREATER <span class="comment">// &gt; or &lt;</span></span><br><span class="line">	SUM         <span class="comment">// +</span></span><br><span class="line">	PRODUCT     <span class="comment">// *</span></span><br><span class="line">	PREFIX      <span class="comment">// -X or !X</span></span><br><span class="line">	CALL        <span class="comment">// myFunction(X)</span></span><br><span class="line">	INDEX       <span class="comment">// array[index]</span></span><br><span class="line">)</span><br></pre></td></tr></table></figure>
+
+<p>这是第一版parseExpression，此时它所做的只是检查前缀位置是否有与p.curToken.Type关联的解析函数。</p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// parser/parser.go</span></span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="params">(p *Parser)</span></span> parseExpression(precedence <span class="type">int</span>) ast.Expression &#123;</span><br><span class="line">    prefix := p.prefixParseFns[p.curToken.Type]</span><br><span class="line">    <span class="keyword">if</span> prefix == <span class="literal">nil</span> &#123;</span><br><span class="line">        <span class="keyword">return</span> <span class="literal">nil</span></span><br><span class="line">    &#125;</span><br><span class="line">    leftExp := prefix()</span><br><span class="line"></span><br><span class="line">    <span class="keyword">return</span> leftExp</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>修改了New()函数，在Parser上初始化了prefixParseFns映射，同时注册了一个解析函数</p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// parser/parser.go</span></span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">New</span><span class="params">(l *lexer.Lexer)</span></span> *Parser &#123;</span><br><span class="line"><span class="comment">// [...]</span></span><br><span class="line"></span><br><span class="line">    p.prefixParseFns = <span class="built_in">make</span>(<span class="keyword">map</span>[token.TokenType]prefixParseFn)</span><br><span class="line">    p.registerPrefix(token.IDENT, p.parseIdentifier)</span><br><span class="line"></span><br><span class="line"><span class="comment">// [...]</span></span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="params">(p *Parser)</span></span> parseIdentifier() ast.Expression &#123;</span><br><span class="line">    <span class="keyword">return</span> &amp;ast.Identifier&#123;Token: p.curToken, Value: p.curToken.Literal&#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>此时如果遇到token.IDENT类型的词法单元，解析函数就会调用在*Parser上定义的parseIdentifier方法。直接返回Identifier的类型和值。</p>
+<h3 id="整数字面量"><a href="#整数字面量" class="headerlink" title="整数字面量"></a>整数字面量</h3><p>整数字面量与标识符几乎一样，也很容易解析。</p>
+<p>由于*ast.IntegerLiteral尚不存在，需要在ast中给出定义。</p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// ast/ast.go</span></span><br><span class="line"></span><br><span class="line"><span class="keyword">type</span> IntegerLiteral <span class="keyword">struct</span> &#123;</span><br><span class="line">    Token token.Token</span><br><span class="line">    Value <span class="type">int64</span></span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="params">(il *IntegerLiteral)</span></span> expressionNode()      &#123;&#125;</span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="params">(il *IntegerLiteral)</span></span> TokenLiteral() <span class="type">string</span> &#123; <span class="keyword">return</span> il.Token.Literal &#125;</span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="params">(il *IntegerLiteral)</span></span> String() <span class="type">string</span>       &#123; <span class="keyword">return</span> il.Token.Literal &#125;</span><br></pre></td></tr></table></figure>
+
+<p>之后注册了parseIntegerLiteral方法，使得parseExpression方法能处理token.INT词法单元。</p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// parser/parser.go</span></span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">New</span><span class="params">(l *lexer.Lexer)</span></span> *Parser &#123;</span><br><span class="line"><span class="comment">// [...]</span></span><br><span class="line">    p.prefixParseFns = <span class="built_in">make</span>(<span class="keyword">map</span>[token.TokenType]prefixParseFn)</span><br><span class="line">    p.registerPrefix(token.IDENT, p.parseIdentifier)</span><br><span class="line">    p.registerPrefix(token.INT, p.parseIntegerLiteral)</span><br><span class="line"></span><br><span class="line"><span class="comment">// [...]</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>parseIntegerLiteral方法实现如下：</p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// parser/parser.go</span></span><br><span class="line"></span><br><span class="line"><span class="keyword">import</span> (</span><br><span class="line"><span class="comment">// [...]</span></span><br><span class="line">    <span class="string">&quot;strconv&quot;</span></span><br><span class="line">)</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="params">(p *Parser)</span></span> parseIntegerLiteral() ast.Expression &#123;</span><br><span class="line">    lit := &amp;ast.IntegerLiteral&#123;Token: p.curToken&#125;</span><br><span class="line"></span><br><span class="line">    value, err := strconv.ParseInt(p.curToken.Literal, <span class="number">0</span>, <span class="number">64</span>)</span><br><span class="line">    <span class="keyword">if</span> err != <span class="literal">nil</span> &#123;</span><br><span class="line">        msg := fmt.Sprintf(<span class="string">&quot;could not parse %q as integer&quot;</span>, p.curToken.Literal)</span><br><span class="line">        p.errors = <span class="built_in">append</span>(p.errors, msg)</span><br><span class="line">        <span class="keyword">return</span> <span class="literal">nil</span></span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    lit.Value = value</span><br><span class="line"></span><br><span class="line">    <span class="keyword">return</span> lit</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>注意：必须将*ast.IntegerLiteral.Token.Literal中的字符串（如”5”）转换为int64。</p>
+<p>这样就实现了整数字面量的解析。</p>
+<h3 id="前缀运算符"><a href="#前缀运算符" class="headerlink" title="前缀运算符"></a>前缀运算符</h3><p>Monkey中的前缀表达式如下所示</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">-5;</span><br><span class="line">!foobar;</span><br><span class="line">5 + -10;</span><br></pre></td></tr></table></figure>
+
+<p>其用法结构如下所示：</p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">&lt;前缀运算符&gt;&lt;表达式&gt;;</span><br></pre></td></tr></table></figure>
+
+<p>首先我们需要定义ast.PrefixExpression节点</p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// ast/ast.go</span></span><br><span class="line"></span><br><span class="line"><span class="keyword">type</span> PrefixExpression <span class="keyword">struct</span> &#123;</span><br><span class="line">    Token    token.Token <span class="comment">// 前缀词法单元，如!</span></span><br><span class="line">    Operator <span class="type">string</span>   <span class="comment">//Operator是包含&quot;-&quot;或&quot;!&quot;的字符串</span></span><br><span class="line">    Right    Expression  <span class="comment">//Right字段包含运算符右边的表达式</span></span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="params">(pe *PrefixExpression)</span></span> expressionNode()      &#123;&#125;</span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="params">(pe *PrefixExpression)</span></span> TokenLiteral() <span class="type">string</span> &#123; <span class="keyword">return</span> pe.Token.Literal &#125;</span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="params">(pe *PrefixExpression)</span></span> String() <span class="type">string</span> &#123;</span><br><span class="line">    <span class="keyword">var</span> out bytes.Buffer</span><br><span class="line"></span><br><span class="line">    out.WriteString(<span class="string">&quot;(&quot;</span>)</span><br><span class="line">    out.WriteString(pe.Operator)</span><br><span class="line">    out.WriteString(pe.Right.String())</span><br><span class="line">    out.WriteString(<span class="string">&quot;)&quot;</span>)</span><br><span class="line"></span><br><span class="line">    <span class="keyword">return</span> out.String()</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>扩展语法分析器和parseExpression方法</p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// parser/parser.go</span></span><br><span class="line"><span class="comment">//将格式化的错误消息添加到语法分析器的errors字段中</span></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="params">(p *Parser)</span></span> noPrefixParseFnError(t token.TokenType) &#123;</span><br><span class="line">    msg := fmt.Sprintf(<span class="string">&quot;no prefix parse function for %s found&quot;</span>, t)</span><br><span class="line">    p.errors = <span class="built_in">append</span>(p.errors, msg)</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="params">(p *Parser)</span></span> parseExpression(precedence <span class="type">int</span>) ast.Expression &#123;</span><br><span class="line">    prefix := p.prefixParseFns[p.curToken.Type]</span><br><span class="line">    <span class="keyword">if</span> prefix == <span class="literal">nil</span> &#123;</span><br><span class="line">        p.noPrefixParseFnError(p.curToken.Type)</span><br><span class="line">        <span class="keyword">return</span> <span class="literal">nil</span></span><br><span class="line">    &#125;</span><br><span class="line">    leftExp := prefix()</span><br><span class="line"></span><br><span class="line">    <span class="keyword">return</span> leftExp</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>为前缀表达式编写一个解析函数并将其注册到语法分析器中</p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// parser/parser.go</span></span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">New</span><span class="params">(l *lexer.Lexer)</span></span> *Parser &#123;</span><br><span class="line"><span class="comment">// [...]</span></span><br><span class="line">    p.registerPrefix(token.BANG, p.parsePrefixExpression)</span><br><span class="line">    p.registerPrefix(token.MINUS, p.parsePrefixExpression)</span><br><span class="line"><span class="comment">// [...]</span></span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="params">(p *Parser)</span></span> parsePrefixExpression() ast.Expression &#123;</span><br><span class="line">    expression := &amp;ast.PrefixExpression&#123;</span><br><span class="line">        Token:    p.curToken,</span><br><span class="line">        Operator: p.curToken.Literal,</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    p.nextToken()</span><br><span class="line">	<span class="comment">//parseExpression调用递归</span></span><br><span class="line">    expression.Right = p.parseExpression(PREFIX)</span><br><span class="line"></span><br><span class="line">    <span class="keyword">return</span> expression</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p><strong>思考</strong>：（!!!!true这种例子？）在parsePrefixExpression中，开始的时候词法单元p.curToken是前缀运算符，返回的时候p.curToken是前缀表达式的操作数，即表达式的最后一个词法单元，这几行代码主要用了<strong>递归的思想</strong>进行解决。</p>
+<h3 id="中缀表达式"><a href="#中缀表达式" class="headerlink" title="中缀表达式"></a>中缀表达式</h3><p>Monkey语言中的中缀表达式：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">5 + 5;</span><br><span class="line">5 - 5;</span><br><span class="line">5 * 5;</span><br><span class="line">5 / 5;</span><br><span class="line">5 &gt; 5;</span><br><span class="line">5 &lt; 5;</span><br><span class="line">5 == 5;</span><br><span class="line">5 != 5;</span><br></pre></td></tr></table></figure>
+
+<p>可以看成如下形式</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">&lt;表达式&gt; &lt;中缀运算符&gt; &lt;表达式&gt;</span><br></pre></td></tr></table></figure>
+
+<p>首先我们需要定义ast.InfixExpression节点。</p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// ast/ast.go</span></span><br><span class="line"></span><br><span class="line"><span class="keyword">type</span> InfixExpression <span class="keyword">struct</span> &#123;</span><br><span class="line">    Token    token.Token <span class="comment">// 运算符词法单元，如+</span></span><br><span class="line">    Left     Expression</span><br><span class="line">    Operator <span class="type">string</span></span><br><span class="line">    Right    Expression</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="params">(ie *InfixExpression)</span></span> expressionNode()      &#123;&#125;</span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="params">(ie *InfixExpression)</span></span> TokenLiteral() <span class="type">string</span> &#123; <span class="keyword">return</span> ie.Token.Literal &#125;</span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="params">(ie *InfixExpression)</span></span> String() <span class="type">string</span> &#123;</span><br><span class="line">    <span class="keyword">var</span> out bytes.Buffer</span><br><span class="line"></span><br><span class="line">    out.WriteString(<span class="string">&quot;(&quot;</span>)</span><br><span class="line">    out.WriteString(ie.Left.String())</span><br><span class="line">    out.WriteString(<span class="string">&quot; &quot;</span> + ie.Operator + <span class="string">&quot; &quot;</span>)</span><br><span class="line">    out.WriteString(ie.Right.String())</span><br><span class="line">    out.WriteString(<span class="string">&quot;)&quot;</span>)</span><br><span class="line"></span><br><span class="line">    <span class="keyword">return</span> out.String()</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>由于我们的语法分析器是<strong>基于自上而下的运算符优先级分析法的语法分析器</strong>，为此，需要有一个优先级表和一些辅助方法：</p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// parser/parser.go</span></span><br><span class="line"><span class="comment">//precedences就是优先级表，用于将词法单元类型与其优先级相关联</span></span><br><span class="line"><span class="keyword">var</span> precedences = <span class="keyword">map</span>[token.TokenType]<span class="type">int</span>&#123;</span><br><span class="line">    token.EQ:       EQUALS,</span><br><span class="line">    token.NOT_EQ:   EQUALS,</span><br><span class="line">    token.LT:       LESSGREATER,</span><br><span class="line">    token.GT:       LESSGREATER,</span><br><span class="line">    token.PLUS:     SUM,</span><br><span class="line">    token.MINUS:    SUM,</span><br><span class="line">    token.SLASH:    PRODUCT,</span><br><span class="line">    token.ASTERISK: PRODUCT,</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">// [...]</span></span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="params">(p *Parser)</span></span> peekPrecedence() <span class="type">int</span> &#123;</span><br><span class="line">    <span class="keyword">if</span> p, ok := precedences[p.peekToken.Type]; ok &#123;</span><br><span class="line">        <span class="keyword">return</span> p</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">return</span> LOWEST</span><br><span class="line">&#125;</span><br><span class="line"><span class="comment">//p.curToken的优先级</span></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="params">(p *Parser)</span></span> curPrecedence() <span class="type">int</span> &#123;</span><br><span class="line">    <span class="keyword">if</span> p, ok := precedences[p.curToken.Type]; ok &#123;</span><br><span class="line">        <span class="keyword">return</span> p</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">return</span> LOWEST</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>接着为所有的中缀运算符注册一个中缀解析函数。</p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// parser/parser.go</span></span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">New</span><span class="params">(l *lexer.Lexer)</span></span> *Parser &#123;</span><br><span class="line"><span class="comment">// [...]</span></span><br><span class="line">    p.infixParseFns = <span class="built_in">make</span>(<span class="keyword">map</span>[token.TokenType]infixParseFn)</span><br><span class="line">    p.registerInfix(token.PLUS, p.parseInfixExpression)</span><br><span class="line">    p.registerInfix(token.MINUS, p.parseInfixExpression)</span><br><span class="line">    p.registerInfix(token.SLASH, p.parseInfixExpression)</span><br><span class="line">    p.registerInfix(token.ASTERISK, p.parseInfixExpression)</span><br><span class="line">    p.registerInfix(token.EQ, p.parseInfixExpression)</span><br><span class="line">    p.registerInfix(token.NOT_EQ, p.parseInfixExpression)</span><br><span class="line">    p.registerInfix(token.LT, p.parseInfixExpression)</span><br><span class="line">    p.registerInfix(token.GT, p.parseInfixExpression)</span><br><span class="line"><span class="comment">// [...]</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>parseInfixExpression解析函数相关联函数如下：</p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// parser/parser.go</span></span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="params">(p *Parser)</span></span> parseInfixExpression(left ast.Expression) ast.Expression &#123;</span><br><span class="line">    expression := &amp;ast.InfixExpression&#123;</span><br><span class="line">        Token:    p.curToken,</span><br><span class="line">        Operator: p.curToken.Literal,</span><br><span class="line">        Left:     left, <span class="comment">// 这个新方法有一个名为left的参数，其类型为ast.Expression</span></span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    precedence := p.curPrecedence()</span><br><span class="line">    p.nextToken()</span><br><span class="line">    expression.Right = p.parseExpression(precedence)</span><br><span class="line"></span><br><span class="line">    <span class="keyword">return</span> expression</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>增强原先的parseExpression函数。普拉特语法分析器的核心parseExpression的最终版本</p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// parser/parser.go</span></span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="params">(p *Parser)</span></span> parseExpression(precedence <span class="type">int</span>) ast.Expression &#123;</span><br><span class="line">    prefix := p.prefixParseFns[p.curToken.Type]</span><br><span class="line">    <span class="keyword">if</span> prefix == <span class="literal">nil</span> &#123;</span><br><span class="line">        p.noPrefixParseFnError(p.curToken.Type)</span><br><span class="line">        <span class="keyword">return</span> <span class="literal">nil</span></span><br><span class="line">    &#125;</span><br><span class="line">    leftExp := prefix()</span><br><span class="line"></span><br><span class="line">    <span class="keyword">for</span> !p.peekTokenIs(token.SEMICOLON) &amp;&amp; precedence &lt; p.peekPrecedence() &#123;</span><br><span class="line">        infix := p.infixParseFns[p.peekToken.Type]</span><br><span class="line">        <span class="keyword">if</span> infix == <span class="literal">nil</span> &#123;</span><br><span class="line">            <span class="keyword">return</span> leftExp</span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">        p.nextToken()</span><br><span class="line"></span><br><span class="line">        leftExp = infix(leftExp)</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">return</span> leftExp</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>先解析前缀表达式再解决后缀表达式，通过递归的方式实现.</p>
+<h2 id="扩展语法分析器"><a href="#扩展语法分析器" class="headerlink" title="扩展语法分析器"></a>扩展语法分析器</h2><h3 id="布尔字面量"><a href="#布尔字面量" class="headerlink" title="布尔字面量"></a>布尔字面量</h3><p>Monkey语言中，可以添加简单的布尔字面量。</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="literal">true</span>;</span><br><span class="line"><span class="literal">false</span>;</span><br><span class="line"><span class="built_in">let</span> foobar = <span class="literal">true</span>;</span><br><span class="line"><span class="built_in">let</span> barfoo = <span class="literal">false</span>;</span><br></pre></td></tr></table></figure>
+
+<p>首先，在AST添加Boolean节点</p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// ast/ast.go</span></span><br><span class="line"></span><br><span class="line"><span class="keyword">type</span> Boolean <span class="keyword">struct</span> &#123;</span><br><span class="line">    Token token.Token</span><br><span class="line">    Value <span class="type">bool</span></span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="params">(b *Boolean)</span></span> expressionNode()      &#123;&#125;</span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="params">(b *Boolean)</span></span> TokenLiteral() <span class="type">string</span> &#123; <span class="keyword">return</span> b.Token.Literal &#125;</span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="params">(b *Boolean)</span></span> String() <span class="type">string</span>       &#123; <span class="keyword">return</span> b.Token.Literal &#125;</span><br></pre></td></tr></table></figure>
+
+<p>为token.TRUE和token.FALSE词法单元注册一个prefixParseFn。</p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// parser/parser.go</span></span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">New</span><span class="params">(l *lexer.Lexer)</span></span> *Parser &#123;</span><br><span class="line"><span class="comment">// [...]</span></span><br><span class="line">    p.registerPrefix(token.TRUE, p.parseBoolean)</span><br><span class="line">    p.registerPrefix(token.FALSE, p.parseBoolean)</span><br><span class="line"><span class="comment">// [...]</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>parseBoolean方法与【标识符&#x2F;整数字面量】类似</p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// parser/parser.go</span></span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="params">(p *Parser)</span></span> parseBoolean() ast.Expression &#123;</span><br><span class="line">    <span class="keyword">return</span> &amp;ast.Boolean&#123;Token: p.curToken, Value: p.curTokenIs(token.TRUE)&#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h3 id="分组表达式"><a href="#分组表达式" class="headerlink" title="分组表达式"></a>分组表达式</h3><p>在Monkey中，可以用括号给表达式分组以修改其优先级，从而影响表达式在上下文中求值的顺序</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">(5+5)*2</span><br></pre></td></tr></table></figure>
+
+<p>由于分组表达式没有单独的AST节点类型，因此此处不会为其编写单元测试。无须修改AST即可正确解析分组表达式！</p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// parser/parser.go</span></span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">New</span><span class="params">(l *lexer.Lexer)</span></span> *Parser &#123;</span><br><span class="line"><span class="comment">// [...]</span></span><br><span class="line">    p.registerPrefix(token.LPAREN, p.parseGroupedExpression)</span><br><span class="line"><span class="comment">// [...]</span></span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="params">(p *Parser)</span></span> parseGroupedExpression() ast.Expression &#123;</span><br><span class="line">    p.nextToken()</span><br><span class="line"></span><br><span class="line">    exp := p.parseExpression(LOWEST)</span><br><span class="line"></span><br><span class="line">    <span class="keyword">if</span> !p.expectPeek(token.RPAREN) &#123;</span><br><span class="line">        <span class="keyword">return</span> <span class="literal">nil</span></span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">return</span> exp</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>这样就完成了。测试通过，只要提高括号内部表达式的优先级就能通过测试。将词法单元类型与函数相关联的概念在这里确实很有用。</p>
+<h3 id="if表达式"><a href="#if表达式" class="headerlink" title="if表达式"></a>if表达式</h3><p>Monkey中也可以使用if和else条件判断语句。</p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">if</span> (x &gt; y) &#123;</span><br><span class="line">  <span class="keyword">return</span> x;</span><br><span class="line">&#125; <span class="keyword">else</span> &#123;</span><br><span class="line">  <span class="keyword">return</span> y;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>抽象出来表示为</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">if</span> (&lt;条件&gt;) &lt;结果&gt; <span class="keyword">else</span> &lt;可替代的结果&gt;</span><br></pre></td></tr></table></figure>
+
+<p>尖括号围起来的“结果”和“可替代的结果”部分是块语句。块语句是由左大括号{开头，右大括号}结束的一系列语句，相当于Monkey中的多条语句。</p>
+<p>首先，定义ast.IfExpression这个AST节点</p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// ast/ast.go</span></span><br><span class="line"></span><br><span class="line"><span class="keyword">type</span> IfExpression <span class="keyword">struct</span> &#123;</span><br><span class="line">    Token       token.Token <span class="comment">// &#x27;if&#x27;词法单元</span></span><br><span class="line">    Condition   Expression</span><br><span class="line">    Consequence *BlockStatement</span><br><span class="line">    Alternative *BlockStatement</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="params">(ie *IfExpression)</span></span> expressionNode()      &#123;&#125;</span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="params">(ie *IfExpression)</span></span> TokenLiteral() <span class="type">string</span> &#123; <span class="keyword">return</span> ie.Token.Literal &#125;</span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="params">(ie *IfExpression)</span></span> String() <span class="type">string</span> &#123;</span><br><span class="line">    <span class="keyword">var</span> out bytes.Buffer</span><br><span class="line"></span><br><span class="line">    out.WriteString(<span class="string">&quot;if&quot;</span>)</span><br><span class="line">    out.WriteString(ie.Condition.String())</span><br><span class="line">    out.WriteString(<span class="string">&quot; &quot;</span>)</span><br><span class="line">    out.WriteString(ie.Consequence.String())</span><br><span class="line"></span><br><span class="line">    <span class="keyword">if</span> ie.Alternative != <span class="literal">nil</span> &#123;</span><br><span class="line">        out.WriteString(<span class="string">&quot;else &quot;</span>)</span><br><span class="line">        out.WriteString(ie.Alternative.String())</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">return</span> out.String()</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>ast.IfExpression实现了ast.Expression接口，并且有3个可以表示if-else条件句的字段。Condition持有条件，可以是任何表达式；Consequence和Alternative根据条件分别指向两种结果，不过它们使用了新的类型ast.BlockStatement。</p>
+<p>同时需要定义BlockStatement的AST节点。</p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// ast/ast.go</span></span><br><span class="line"></span><br><span class="line"><span class="keyword">type</span> BlockStatement <span class="keyword">struct</span> &#123;</span><br><span class="line">    Token      token.Token <span class="comment">// &#x27;&#123;&#x27;词法单元</span></span><br><span class="line">    Statements []Statement</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="params">(bs *BlockStatement)</span></span> statementNode()       &#123;&#125;</span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="params">(bs *BlockStatement)</span></span> TokenLiteral() <span class="type">string</span> &#123; <span class="keyword">return</span> bs.Token.Literal &#125;</span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="params">(bs *BlockStatement)</span></span> String() <span class="type">string</span> &#123;</span><br><span class="line">    <span class="keyword">var</span> out bytes.Buffer</span><br><span class="line"></span><br><span class="line">    <span class="keyword">for</span> _, s := <span class="keyword">range</span> bs.Statements &#123;</span><br><span class="line">        out.WriteString(s.String())</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">return</span> out.String()</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>显然，需要为token.IF词法单元注册一个prefixParseFn。</p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// parser/parser.go</span></span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">New</span><span class="params">(l *lexer.Lexer)</span></span> *Parser &#123;</span><br><span class="line"><span class="comment">// [...]</span></span><br><span class="line">    p.registerPrefix(token.IF, p.parseIfExpression)</span><br><span class="line"><span class="comment">// [...]</span></span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="params">(p *Parser)</span></span> parseIfExpression() ast.Expression &#123;</span><br><span class="line">	expression := &amp;ast.IfExpression&#123;Token: p.curToken&#125;</span><br><span class="line">    <span class="comment">//判断是否为(</span></span><br><span class="line">	<span class="keyword">if</span> !p.expectPeek(token.LPAREN) &#123;</span><br><span class="line">		<span class="keyword">return</span> <span class="literal">nil</span></span><br><span class="line">	&#125;</span><br><span class="line"></span><br><span class="line">	p.nextToken()</span><br><span class="line">    <span class="comment">//解析表达式</span></span><br><span class="line">	expression.Condition = p.parseExpression(LOWEST)</span><br><span class="line">    <span class="comment">//判断是否为)</span></span><br><span class="line">	<span class="keyword">if</span> !p.expectPeek(token.RPAREN) &#123;</span><br><span class="line">		<span class="keyword">return</span> <span class="literal">nil</span></span><br><span class="line">	&#125;</span><br><span class="line">    <span class="comment">//判断是否为&#123;</span></span><br><span class="line">	<span class="keyword">if</span> !p.expectPeek(token.LBRACE) &#123;</span><br><span class="line">		<span class="keyword">return</span> <span class="literal">nil</span></span><br><span class="line">	&#125;</span><br><span class="line">    <span class="comment">//解析成立的块&#123;&#125;语句</span></span><br><span class="line">	expression.Consequence = p.parseBlockStatement()</span><br><span class="line">	<span class="comment">//判断是否为else</span></span><br><span class="line">	<span class="keyword">if</span> p.peekTokenIs(token.ELSE) &#123;</span><br><span class="line">		p.nextToken()</span><br><span class="line">		<span class="comment">//判断是否为&#123;</span></span><br><span class="line">		<span class="keyword">if</span> !p.expectPeek(token.LBRACE) &#123;</span><br><span class="line">			<span class="keyword">return</span> <span class="literal">nil</span></span><br><span class="line">		&#125;</span><br><span class="line">		<span class="comment">//解析不成立的块&#123;&#125;语句</span></span><br><span class="line">		expression.Alternative = p.parseBlockStatement()</span><br><span class="line">	&#125;</span><br><span class="line"></span><br><span class="line">	<span class="keyword">return</span> expression</span><br><span class="line">&#125;</span><br><span class="line"><span class="comment">// parser/parser.go</span></span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="params">(p *Parser)</span></span> parseBlockStatement() *ast.BlockStatement &#123;</span><br><span class="line">    block := &amp;ast.BlockStatement&#123;Token: p.curToken&#125;</span><br><span class="line">    block.Statements = []ast.Statement&#123;&#125;</span><br><span class="line"></span><br><span class="line">    p.nextToken()</span><br><span class="line">	</span><br><span class="line">    <span class="keyword">for</span> !p.curTokenIs(token.RBRACE) &amp;&amp; !p.curTokenIs(token.EOF) &#123;</span><br><span class="line">        stmt := p.parseStatement()</span><br><span class="line">        <span class="keyword">if</span> stmt != <span class="literal">nil</span> &#123;</span><br><span class="line">            block.Statements = <span class="built_in">append</span>(block.Statements, stmt)</span><br><span class="line">        &#125;</span><br><span class="line">        p.nextToken()</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">return</span> block</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h3 id="函数字面量"><a href="#函数字面量" class="headerlink" title="函数字面量"></a>函数字面量</h3><p>在Monkey中，函数字面量是定义函数的方式，其中包括函数的参数及作用。</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">fn(x,y)&#123;</span><br><span class="line">	<span class="built_in">return</span> x+y;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>函数字面量以关键字fn开头，后跟一个参数列表，再后面跟一个块语句。块语句是函数的主体，调用函数时会执行块语句。函数字面量的抽象结构如下所示：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">fn &lt;参数列表/参数1,参数2,参数3/可为空&gt; &lt;块语句&gt;</span><br></pre></td></tr></table></figure>
+
+
+
+<p>函数字面量有两个主要部分，分别是参数列表和作为函数主体的块语句。因此据此定义出AST节点。</p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// ast/ast.go</span></span><br><span class="line"></span><br><span class="line"><span class="keyword">import</span> (</span><br><span class="line"><span class="comment">// [...]</span></span><br><span class="line">    <span class="string">&quot;strings&quot;</span></span><br><span class="line">)</span><br><span class="line"></span><br><span class="line"><span class="keyword">type</span> FunctionLiteral <span class="keyword">struct</span> &#123;</span><br><span class="line">    Token      token.Token <span class="comment">// &#x27;fn&#x27;词法单元</span></span><br><span class="line">    Parameters []*Identifier <span class="comment">//参数列表</span></span><br><span class="line">    Body       *BlockStatement <span class="comment">//块语句</span></span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="params">(fl *FunctionLiteral)</span></span> expressionNode()      &#123;&#125;</span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="params">(fl *FunctionLiteral)</span></span> TokenLiteral() <span class="type">string</span> &#123; <span class="keyword">return</span> fl.Token.Literal &#125;</span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="params">(fl *FunctionLiteral)</span></span> String() <span class="type">string</span> &#123;</span><br><span class="line">    <span class="keyword">var</span> out bytes.Buffer</span><br><span class="line"></span><br><span class="line">    params := []<span class="type">string</span>&#123;&#125;</span><br><span class="line">    <span class="keyword">for</span> _, p := <span class="keyword">range</span> fl.Parameters &#123;</span><br><span class="line">        params = <span class="built_in">append</span>(params, p.String())</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    out.WriteString(fl.TokenLiteral())</span><br><span class="line">    out.WriteString(<span class="string">&quot;(&quot;</span>)</span><br><span class="line">    out.WriteString(strings.Join(params, <span class="string">&quot;, &quot;</span>))</span><br><span class="line">    out.WriteString(<span class="string">&quot;) &quot;</span>)</span><br><span class="line">    out.WriteString(fl.Body.String())</span><br><span class="line"></span><br><span class="line">    <span class="keyword">return</span> out.String()</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>接着，很明显需要为token.FUNCTION词法单元注册一个新的prefixParseFn。</p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// parser/parser.go</span></span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">New</span><span class="params">(l *lexer.Lexer)</span></span> *Parser &#123;</span><br><span class="line"><span class="comment">// [...] 注册解析函数</span></span><br><span class="line">    p.registerPrefix(token.FUNCTION, p.parseFunctionLiteral)</span><br><span class="line"><span class="comment">// [...]</span></span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="params">(p *Parser)</span></span> parseFunctionLiteral() ast.Expression &#123;</span><br><span class="line">    lit := &amp;ast.FunctionLiteral&#123;Token: p.curToken&#125;</span><br><span class="line">    <span class="comment">//判断当前字符是否为(</span></span><br><span class="line">    <span class="keyword">if</span> !p.expectPeek(token.LPAREN) &#123;</span><br><span class="line">        <span class="keyword">return</span> <span class="literal">nil</span></span><br><span class="line">    &#125;</span><br><span class="line">	<span class="comment">//解析参数列表</span></span><br><span class="line">    lit.Parameters = p.parseFunctionParameters()</span><br><span class="line">    <span class="comment">//判断当前字符是否为)</span></span><br><span class="line">    <span class="keyword">if</span> !p.expectPeek(token.LBRACE) &#123;</span><br><span class="line">        <span class="keyword">return</span> <span class="literal">nil</span></span><br><span class="line">    &#125;</span><br><span class="line">	<span class="comment">//解析块语句</span></span><br><span class="line">    lit.Body = p.parseBlockStatement()</span><br><span class="line"></span><br><span class="line">    <span class="keyword">return</span> lit</span><br><span class="line">&#125;</span><br><span class="line"><span class="comment">// parser/parser.go</span></span><br><span class="line"><span class="comment">//解析参数列表函数</span></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="params">(p *Parser)</span></span> parseFunctionParameters() []*ast.Identifier &#123;</span><br><span class="line">    identifiers := []*ast.Identifier&#123;&#125;</span><br><span class="line">    <span class="comment">//判断是否下一个字符是否为)</span></span><br><span class="line">    <span class="keyword">if</span> p.peekTokenIs(token.RPAREN) &#123;</span><br><span class="line">        p.nextToken()</span><br><span class="line">        <span class="keyword">return</span> identifiers</span><br><span class="line">    &#125;</span><br><span class="line">	</span><br><span class="line">    p.nextToken()</span><br><span class="line">	</span><br><span class="line">    ident := &amp;ast.Identifier&#123;Token: p.curToken, Value: p.curToken.Literal&#125;</span><br><span class="line">    <span class="comment">//变量构建参数列表</span></span><br><span class="line">    identifiers = <span class="built_in">append</span>(identifiers, ident)</span><br><span class="line"></span><br><span class="line">    <span class="keyword">for</span> p.peekTokenIs(token.COMMA) &#123;</span><br><span class="line">        p.nextToken()</span><br><span class="line">        p.nextToken()</span><br><span class="line">        ident := &amp;ast.Identifier&#123;Token: p.curToken, Value: p.curToken.Literal&#125;</span><br><span class="line">        identifiers = <span class="built_in">append</span>(identifiers, ident)</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">if</span> !p.expectPeek(token.RPAREN) &#123;</span><br><span class="line">        <span class="keyword">return</span> <span class="literal">nil</span></span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">return</span> identifiers</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>这样就可以实现函数的解析啦！</p>
+<h3 id="调用表达式"><a href="#调用表达式" class="headerlink" title="调用表达式"></a>调用表达式</h3><p>接下来，看Monkey中解析函数的调用</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">add(2+2,3*3)</span><br></pre></td></tr></table></figure>
+
+<p>函数字面量的抽象结构如下所示：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">&lt;表达式&gt;(&lt;以逗号分隔的表达式列表&gt;)</span><br></pre></td></tr></table></figure>
+
+<p>首先，据此定义出AST节点。</p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// ast/ast.go</span></span><br><span class="line"></span><br><span class="line"><span class="keyword">type</span> CallExpression <span class="keyword">struct</span> &#123;</span><br><span class="line">    Token     token.Token <span class="comment">// &#x27;(&#x27;词法单元</span></span><br><span class="line">    Function  Expression <span class="comment">// 标识符或函数字面量</span></span><br><span class="line">    Arguments []Expression</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="params">(ce *CallExpression)</span></span> expressionNode()      &#123;&#125;</span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="params">(ce *CallExpression)</span></span> TokenLiteral() <span class="type">string</span> &#123; <span class="keyword">return</span> ce.Token.Literal &#125;</span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="params">(ce *CallExpression)</span></span> String() <span class="type">string</span> &#123;</span><br><span class="line">    <span class="keyword">var</span> out bytes.Buffer</span><br><span class="line"></span><br><span class="line">    args := []<span class="type">string</span>&#123;&#125;</span><br><span class="line">    <span class="keyword">for</span> _, a := <span class="keyword">range</span> ce.Arguments &#123;</span><br><span class="line">        args = <span class="built_in">append</span>(args, a.String())</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    out.WriteString(ce.Function.String())</span><br><span class="line">    out.WriteString(<span class="string">&quot;(&quot;</span>)</span><br><span class="line">    out.WriteString(strings.Join(args, <span class="string">&quot;, &quot;</span>))</span><br><span class="line">    out.WriteString(<span class="string">&quot;)&quot;</span>)</span><br><span class="line"></span><br><span class="line">    <span class="keyword">return</span> out.String()</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>函数标识符之后是一个token.LPAREN，此时左括号位于标识符和参数列表之间，相当于在中缀位置。这意味着需要为token.LPAREN注册一个infixParseFn，这样就可以解析函数表达式了（无论它是标识符还是函数字面量）。然后检查与token.LPAREN关联的infixParseFn，使用已解析的表达式作为参数来调用它。最后在这个infixParseFn中解析参数列表。</p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// parser/parser.go</span></span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">New</span><span class="params">(l *lexer.Lexer)</span></span> *Parser &#123;</span><br><span class="line"><span class="comment">// [...]</span></span><br><span class="line">    p.registerInfix(token.LPAREN, p.parseCallExpression)</span><br><span class="line"><span class="comment">// [...]</span></span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="params">(p *Parser)</span></span> parseCallExpression(function ast.Expression) ast.Expression &#123;</span><br><span class="line">    exp := &amp;ast.CallExpression&#123;Token: p.curToken, Function: function&#125;</span><br><span class="line">    exp.Arguments = p.parseCallArguments()</span><br><span class="line">    <span class="keyword">return</span> exp</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="params">(p *Parser)</span></span> parseCallArguments() []ast.Expression &#123;</span><br><span class="line">    args := []ast.Expression&#123;&#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">if</span> p.peekTokenIs(token.RPAREN) &#123;</span><br><span class="line">        p.nextToken()</span><br><span class="line">        <span class="keyword">return</span> args</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    p.nextToken()</span><br><span class="line">    args = <span class="built_in">append</span>(args, p.parseExpression(LOWEST))</span><br><span class="line"></span><br><span class="line">    <span class="keyword">for</span> p.peekTokenIs(token.COMMA) &#123;</span><br><span class="line">        p.nextToken()</span><br><span class="line">        p.nextToken()</span><br><span class="line">        args = <span class="built_in">append</span>(args, p.parseExpression(LOWEST))</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">if</span> !p.expectPeek(token.RPAREN) &#123;</span><br><span class="line">        <span class="keyword">return</span> <span class="literal">nil</span></span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">return</span> args</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>之后为这个左括号附上优先级</p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// parser/parser.go</span></span><br><span class="line"></span><br><span class="line"><span class="keyword">var</span> precedences = <span class="keyword">map</span>[token.TokenType]<span class="type">int</span>&#123;</span><br><span class="line"><span class="comment">// [...]</span></span><br><span class="line">    token.LPAREN: CALL,</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+
+
+<p>这样的话，语法分析器就大致告一段落了！</p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">$ <span class="keyword">go</span> run main.<span class="keyword">go</span></span><br><span class="line">Hello mrnugget! This is the Monkey programming language!</span><br><span class="line">Feel free to <span class="keyword">type</span> in commands</span><br><span class="line">&gt;&gt; let x = <span class="number">1</span> * <span class="number">2</span> * <span class="number">3</span> * <span class="number">4</span> * <span class="number">5</span></span><br><span class="line">let x = ((((<span class="number">1</span> * <span class="number">2</span>) * <span class="number">3</span>) * <span class="number">4</span>) * <span class="number">5</span>);</span><br><span class="line">&gt;&gt; x * y / <span class="number">2</span> + <span class="number">3</span> * <span class="number">8</span> - <span class="number">123</span></span><br><span class="line">((((x * y) / <span class="number">2</span>) + (<span class="number">3</span> * <span class="number">8</span>)) - <span class="number">123</span>)</span><br><span class="line">&gt;&gt; <span class="literal">true</span> == <span class="literal">false</span></span><br><span class="line">(<span class="literal">true</span> == <span class="literal">false</span>)</span><br><span class="line">&gt;&gt;</span><br></pre></td></tr></table></figure>
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/%E3%80%8A%E7%94%A8Go%E8%AF%AD%E8%A8%80%E8%87%AA%E5%88%B6%E8%A7%A3%E9%87%8A%E5%99%A8%E3%80%8B/" rel="tag"># 《用Go语言自制解释器》</a>
+          
+        </div>
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2022/12/30/%E4%B8%80-%E8%AF%8D%E6%B3%95%E5%88%86%E6%9E%90/" rel="next" title="一.词法分析">
+                <i class="fa fa-chevron-left"></i> 一.词法分析
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/2022/12/30/%E4%B8%89-%E6%B1%82%E5%80%BC/" rel="prev" title="三.求值">
+                三.求值 <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+
+          
+
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            Table of Contents
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            Overview
+          </li>
+        </ul>
+      
+
+      <section class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+            
+              <img class="site-author-image" itemprop="image"
+                src="/images/user.jpg"
+                alt="" />
+            
+              <p class="site-author-name" itemprop="name"></p>
+              <p class="site-description motion-element" itemprop="description"></p>
+          </div>
+
+          <nav class="site-state motion-element">
+
+            
+              <div class="site-state-item site-state-posts">
+              
+                <a href="/archives/%20%7C%7C%20archive">
+              
+                  <span class="site-state-item-count">5</span>
+                  <span class="site-state-item-name">posts</span>
+                </a>
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-categories">
+                
+                  <span class="site-state-item-count">1</span>
+                  <span class="site-state-item-name">categories</span>
+                
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-tags">
+                
+                  <span class="site-state-item-count">1</span>
+                  <span class="site-state-item-name">tags</span>
+                
+              </div>
+            
+
+          </nav>
+
+          
+
+          
+
+          
+          
+
+          
+          
+
+          
+
+        </div>
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#%E8%AF%AD%E6%B3%95%E5%88%86%E6%9E%90"><span class="nav-number">1.</span> <span class="nav-text">语法分析</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%A6%82%E5%BF%B5"><span class="nav-number">1.1.</span> <span class="nav-text">概念</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E8%A7%A3%E6%9E%90let%E8%AF%AD%E5%8F%A5"><span class="nav-number">1.2.</span> <span class="nav-text">解析let语句</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E8%A7%A3%E6%9E%90return%E8%AF%AD%E5%8F%A5"><span class="nav-number">1.3.</span> <span class="nav-text">解析return语句</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E8%A7%A3%E6%9E%90%E8%A1%A8%E8%BE%BE%E5%BC%8F"><span class="nav-number">1.4.</span> <span class="nav-text">解析表达式</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%A0%87%E8%AF%86%E7%AC%A6"><span class="nav-number">1.4.1.</span> <span class="nav-text">标识符</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%95%B4%E6%95%B0%E5%AD%97%E9%9D%A2%E9%87%8F"><span class="nav-number">1.4.2.</span> <span class="nav-text">整数字面量</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%89%8D%E7%BC%80%E8%BF%90%E7%AE%97%E7%AC%A6"><span class="nav-number">1.4.3.</span> <span class="nav-text">前缀运算符</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E4%B8%AD%E7%BC%80%E8%A1%A8%E8%BE%BE%E5%BC%8F"><span class="nav-number">1.4.4.</span> <span class="nav-text">中缀表达式</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%89%A9%E5%B1%95%E8%AF%AD%E6%B3%95%E5%88%86%E6%9E%90%E5%99%A8"><span class="nav-number">1.5.</span> <span class="nav-text">扩展语法分析器</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%B8%83%E5%B0%94%E5%AD%97%E9%9D%A2%E9%87%8F"><span class="nav-number">1.5.1.</span> <span class="nav-text">布尔字面量</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%88%86%E7%BB%84%E8%A1%A8%E8%BE%BE%E5%BC%8F"><span class="nav-number">1.5.2.</span> <span class="nav-text">分组表达式</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#if%E8%A1%A8%E8%BE%BE%E5%BC%8F"><span class="nav-number">1.5.3.</span> <span class="nav-text">if表达式</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%87%BD%E6%95%B0%E5%AD%97%E9%9D%A2%E9%87%8F"><span class="nav-number">1.5.4.</span> <span class="nav-text">函数字面量</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E8%B0%83%E7%94%A8%E8%A1%A8%E8%BE%BE%E5%BC%8F"><span class="nav-number">1.5.5.</span> <span class="nav-text">调用表达式</span></a></li></ol></li></ol></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; <span itemprop="copyrightYear">2022</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">John Doe</span>
+
+  
+</div>
+
+
+  <div class="powered-by">Powered by <a class="theme-link" target="_blank" href="https://hexo.io">Hexo</a></div>
+
+
+
+  <span class="post-meta-divider">|</span>
+
+
+
+  <div class="theme-info">Theme &mdash; <a class="theme-link" target="_blank" href="https://github.com/iissnan/hexo-theme-next">NexT.Gemini</a> v5.1.4</div>
+
+
+
+
+        
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
+    
+
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+  
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=5.1.4"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=5.1.4"></script>
+
+
+
+  
+  
+
+
+  <script type="text/javascript" src="/js/src/affix.js?v=5.1.4"></script>
+
+  <script type="text/javascript" src="/js/src/schemes/pisces.js?v=5.1.4"></script>
+
+
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=5.1.4"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  
+
+
+
+
+	
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+  
+
+  
+
+  
+  
+
+  
+
+  
+
+  
+
+</body>
+</html>
